@@ -6,16 +6,18 @@ const Dropdown = ({
   onchange,
   label,
   dropdownClass = "",
+  error,
+  errorText,
 }) => {
   return (
     <>
-      <div className="w-full md:grid md:grid-flow-col md:items-center md:grid-cols-10 gap-[13px]">
+      <div className="w-full">
         {label && (
-          <label className="w-full text-base font-normal md:col-span-2 leading-tight text-[#111111] ">
+          <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
             {label}
           </label>
         )}
-        <div className={`col-span-2 ${dropdownClass}`}>
+        <div className={`${dropdownClass}`}>
           <Select
             value={value}
             onChange={onchange}
@@ -28,14 +30,21 @@ const Dropdown = ({
               }),
               valueContainer: (base) => ({
                 ...base,
-                padding: "1px",
-                paddingRight: "5px",
+                padding: "4px",
                 paddingLeft: "5px",
+                color: "#686677",
               }),
-              dropdownIndicator: (base) => ({
+              singleValue: (base) => ({
                 ...base,
-                padding: "0px",
-                paddingRight: "1px",
+                color: "#686677",
+              }),
+              input: (base) => ({
+                ...base,
+                color: "#686677",
+              }),
+              menu: (base) => ({
+                ...base,
+                color: "#686677",
               }),
             }}
             theme={(theme) => ({
@@ -43,7 +52,7 @@ const Dropdown = ({
               borderRadius: 6,
               colors: {
                 ...theme.colors,
-                primary: "#A9A6CF",
+                primary: "#CBCAD7",
               },
             })}
           />
@@ -64,6 +73,11 @@ const Dropdown = ({
             ))}
           </select> */}
         </div>
+        {error && (
+          <span className="w-full text-sm mt-2 text-[#ff0000]">
+            {errorText}
+          </span>
+        )}
       </div>
     </>
   );

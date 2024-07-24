@@ -4,14 +4,16 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import Dropdown from "@/components/Dropdown";
 import Select from "react-select";
-import DatePicker from "react-datepicker";
-import { useEffect, useState } from "react";
-import "react-datepicker/dist/react-datepicker.css";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import logo from "../Images/logo.png";
+import { useRouter } from "next/router";
+import Loading from "@/components/Loading";
 
 let client_types = [
-  { name: "individual", value: "individual" },
-  { name: "couple", value: "couple" },
-  { name: "trust/company", value: "company" },
+  { name: "individual", value: -1 },
+  { name: "couple", value: 1 },
+  { name: "trust/company", value: 2 },
 ];
 
 let currencies = [
@@ -92,55 +94,98 @@ let months = [
 ];
 
 export default function Register() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [years, setYears] = useState([]);
   const [days, setDays] = useState([]);
   const [selectedYear, setSelectedYear] = useState();
   const [selectedMonth, setSelectedMonth] = useState();
   const [selectedDay, setSelectedDay] = useState();
-  const { values, handleChange, setFieldValue, setValues, handleSubmit } =
-    useFormik({
-      initialValues: {
-        phone_number: "",
-        client_type: {
-          name: "individual",
-          value: "individual",
-        },
-        fname: "",
-        lname: "",
-        email: "",
-        dob: "",
-        currency: {
-          label: "Indian Rupees",
-          value: "INR",
-        },
-        phone_type: {
-          label: "Home",
-          value: "home",
-        },
+  const [error, setError] = useState("");
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    setFieldValue,
+    setValues,
+    handleSubmit,
+  } = useFormik({
+    initialValues: {
+      phone_number: "",
+      client_type: {
+        name: "individual",
+        value: -1,
       },
-      validationSchema: Yup.object({
-        phone_number: Yup.string().required("Phone Number is required"),
-        client_type: Yup.object({
-          value: Yup.string().required("Required"),
-          name: Yup.string(),
-        }),
-        fname: Yup.string().required("First Name is required"),
-        lname: Yup.string().required("Last Name is required"),
-        email: Yup.string().required("Email is required"),
-        dob: Yup.string().required("Dob is required"),
-        currency: Yup.object({
-          value: Yup.string().required("Required"),
-          label: Yup.string(),
-        }),
-        phone_type: Yup.object({
-          value: Yup.string().required("Required"),
-          label: Yup.string(),
-        }),
+      fname: "",
+      lname: "",
+      email: "",
+      dob: "",
+      currency: {
+        label: "Indian Rupees",
+        value: "INR",
+      },
+      phone_type: {
+        label: "Home",
+        value: "home",
+      },
+      age_retire: "",
+      life_expectancy: "",
+    },
+    validationSchema: Yup.object({
+      phone_number: Yup.string().required("Phone Number is required"),
+      client_type: Yup.object({
+        value: Yup.string().required("Required"),
+        name: Yup.string(),
       }),
-      onSubmit: (values) => {
-        console.log(values);
-      },
-    });
+      fname: Yup.string().required("First Name is required"),
+      lname: Yup.string().required("Last Name is required"),
+      email: Yup.string().required("Email is required"),
+      dob: Yup.string().required("Dob is required"),
+      currency: Yup.object({
+        value: Yup.string().required("Required"),
+        label: Yup.string(),
+      }),
+      phone_type: Yup.object({
+        value: Yup.string().required("Required"),
+        label: Yup.string(),
+      }),
+      age_retire: Yup.string().required("Age to retire is required"),
+      life_expectancy: Yup.string().required("Life expectancy is required"),
+    }),
+    onSubmit: async (values) => {
+      setLoading(true);
+      setError("");
+      let data = {
+        fname: values.fname,
+        lname: values.lname,
+        phone_type: values.phone_type.value,
+        phone_number: values.phone_number,
+        client_type: values.client_type.value,
+        email: values.email,
+        dob: values.dob,
+        currency: values.currency.value,
+        age_retire: values.age_retire,
+        life_expectancy: values.life_expectancy,
+      };
+      const res = await fetch("/api/auth/registration", {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...data }),
+      });
+      let res1 = await res.json();
+      if (res1.success) {
+        router.push("/login");
+        setLoading(false);
+      } else {
+        setLoading(false);
+        setError(res1.error);
+      }
+    },
+  });
 
   const getYears = () => {
     let currentYear = new Date().getFullYear();
@@ -165,336 +210,405 @@ export default function Register() {
     getYears();
   }, []);
 
+  useMemo(() => {
+    setError("");
+  }, [values]);
+
   return (
-    <main
-      className={`flex w-full min-h-screen flex-col items-center justify-between px-12 md:px-24 lg:px-[130px] py-8 md:py-16 bg-white`}
-    >
-      <div className="w-full">
-        <div className={`w-full bg-white`}>
-          <div className="mb-6 md:mb-10">
-            <h2 className="text-navyBlue font-semibold text-[35px] md:text-[40px]">
-              Wealth Munshi
-            </h2>
+    <div className={`w-full h-full md:flex px-5 py-5 bg-white`}>
+      <div className="h-full w-full md:w-[20%] lg:w-[10%] flex-auto px-12">
+        <div className="h-full flex flex-col justify-between">
+          <div className="flex flex-col items-center">
+            <div className="mb-8">
+              <Image src={logo} priority={true} width="160" alt="logo" />
+            </div>
+            <form onSubmit={handleSubmit} className="grid gap-5">
+              <div className="text-left">
+                <h2 className="text-[32px] font-semibold">
+                  Welcome to Wealthmunshi 👋
+                </h2>
+                <p className="text-[#49475A] mt-2">
+                  Please login to continue to your account.
+                </p>
+              </div>
+              <div className="grid gap-3">
+                <div className="grid grid-cols-2 gap-5 mt-5">
+                  <Input
+                    label={"First Name"}
+                    value={values.fname}
+                    id="fname"
+                    onchange={handleChange}
+                    error={touched.fname && errors.fname ? true : false}
+                    errorText={errors.fname}
+                  />
+                  <Input
+                    label={"Last Name"}
+                    value={values.lname}
+                    id="lname"
+                    onchange={handleChange}
+                    error={touched.lname && errors.lname ? true : false}
+                    errorText={errors.lname}
+                  />
+                </div>
+                <div className="">
+                  <Input
+                    label={"Email Address"}
+                    value={values.email}
+                    id="email"
+                    keytype="email"
+                    onchange={handleChange}
+                    error={touched.email && errors.email ? true : false}
+                    errorText={errors.email}
+                  />
+                </div>
+                <div className="">
+                  <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
+                    Phone Number
+                  </label>
+                  <div className="w-full grid grid-cols-3 gap-5">
+                    <Select
+                      value={values.phone_type}
+                      id="phone_type"
+                      onChange={(v) => {
+                        setValues({
+                          ...values,
+                          phone_type: {
+                            label: v.label,
+                            value: v.value,
+                          },
+                        });
+                      }}
+                      options={phoneTypes}
+                      components={{ IndicatorSeparator: null }}
+                      styles={{
+                        container: (base) => ({
+                          ...base,
+                          fontSize: "16px",
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                          padding: "4px",
+                          color: "#686677",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 6,
+                        colors: {
+                          ...theme.colors,
+                          primary: "#CBCAD7",
+                        },
+                      })}
+                    />
+                    <input
+                      value={values.phone_number}
+                      id="phone_number"
+                      onChange={handleChange}
+                      type="number"
+                      className={`w-full md:col-span-2 rounded border-0 ring-[0.5px] ring-[#CBCAD7] text-[#686677] bg-transparent px-2 py-2 text-base font-normal text-blue-gray-700 outline-0  focus:ring-2 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50`}
+                    />
+                  </div>
+                  {touched.phone_number && errors.phone_number ? (
+                    <span className="w-full text-sm mt-2 text-[#ff0000]">
+                      {errors.phone_number}
+                    </span>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+                <div className="">
+                  <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
+                    Date of Birth
+                  </label>
+                  <div className="grid grid-cols-3 gap-5">
+                    <Select
+                      value={selectedDay}
+                      placeholder="Day:"
+                      onChange={(v) => {
+                        setSelectedDay(v);
+                        if (selectedMonth?.value && selectedYear?.value) {
+                          let day = v.value;
+                          let month = selectedMonth.value;
+                          let year = selectedYear.value;
+                          let date = `${day}-${month}-${year}`;
+                          setFieldValue("dob", new Date(date));
+                        }
+                      }}
+                      options={days}
+                      components={{ IndicatorSeparator: null }}
+                      styles={{
+                        container: (base) => ({
+                          ...base,
+                          fontSize: "16px",
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                          padding: "4px",
+                          color: "#686677",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 6,
+                        colors: {
+                          ...theme.colors,
+                          primary: "#CBCAD7",
+                        },
+                      })}
+                    />
+                    <Select
+                      value={selectedMonth}
+                      placeholder="Month:"
+                      onChange={(v) => {
+                        setSelectedMonth(v);
+                        // get list of days in selected month
+                        let year =
+                          selectedYear?.value ?? new Date().getFullYear();
+                        let month = v.value;
+                        const numDays = (y, m) => new Date(y, m, 0).getDate();
+                        let monthofDays = numDays(year, month);
+                        let damimonthDays = [];
+                        for (var i = 1; i <= monthofDays; i++) {
+                          damimonthDays.push({ label: i, value: i });
+                        }
+                        setDays(damimonthDays);
+                        if (
+                          selectedDay?.value &&
+                          selectedDay.value > monthofDays
+                        )
+                          setSelectedDay({
+                            label: monthofDays,
+                            value: monthofDays,
+                          });
+                        if (selectedDay?.value && selectedYear?.value) {
+                          let day = selectedDay.value;
+                          let date = `${day}-${month}-${year}`;
+                          setFieldValue("dob", new Date(date));
+                        }
+                      }}
+                      options={months}
+                      components={{ IndicatorSeparator: null }}
+                      styles={{
+                        container: (base) => ({
+                          ...base,
+                          fontSize: "16px",
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                          padding: "4px",
+                          color: "#686677",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 6,
+                        colors: {
+                          ...theme.colors,
+                          primary: "#CBCAD7",
+                        },
+                      })}
+                    />
+                    <Select
+                      value={selectedYear}
+                      placeholder="Year:"
+                      onChange={(v) => {
+                        setSelectedYear(v);
+                        // get list of days in selected month
+                        let year = v.value;
+                        let month =
+                          selectedMonth?.value ?? new Date().getMonth();
+                        const numDays = (y, m) => new Date(y, m, 0).getDate();
+                        let monthofDays = numDays(year, month);
+                        let damimonthDays = [];
+                        for (var i = 1; i <= monthofDays; i++) {
+                          damimonthDays.push({ label: i, value: i });
+                        }
+                        setDays(damimonthDays);
+                        if (
+                          selectedDay?.value &&
+                          selectedDay.value > monthofDays
+                        )
+                          setSelectedDay({
+                            label: monthofDays,
+                            value: monthofDays,
+                          });
+                        if (selectedMonth?.value && selectedDay?.value) {
+                          let day = selectedDay.value;
+                          let date = `${day}-${month}-${year}`;
+                          setFieldValue("dob", new Date(date));
+                        }
+                      }}
+                      options={years}
+                      components={{ IndicatorSeparator: null }}
+                      styles={{
+                        container: (base) => ({
+                          ...base,
+                          fontSize: "16px",
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                          padding: "4px",
+                          color: "#686677",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          color: "#686677",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 6,
+                        colors: {
+                          ...theme.colors,
+                          primary: "#CBCAD7",
+                        },
+                      })}
+                    />
+                  </div>
+                  {touched.dob && errors.dob ? (
+                    <span className="w-full text-sm mt-2 text-[#ff0000]">
+                      {errors.dob}
+                    </span>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    label={"Age to retire"}
+                    value={values.age_retire}
+                    id="age_retire"
+                    onchange={handleChange}
+                    keytype={"number"}
+                    error={
+                      touched.age_retire && errors.age_retire ? true : false
+                    }
+                    errorText={errors.age_retire}
+                  />
+                  <Input
+                    label={"Life expectancy"}
+                    value={values.life_expectancy}
+                    id="life_expectancy"
+                    onchange={handleChange}
+                    keytype={"number"}
+                    error={
+                      touched.life_expectancy && errors.life_expectancy
+                        ? true
+                        : false
+                    }
+                    errorText={errors.life_expectancy}
+                  />
+                </div>
+                <Dropdown
+                  label="Currency"
+                  options={currencies}
+                  value={values.currency}
+                  onchange={(v) => {
+                    console.log(v);
+                    setFieldValue("currency.label", v.label);
+                    setFieldValue("currency.value", v.value);
+                  }}
+                  error={
+                    touched.currency?.value && errors.currency?.value
+                      ? true
+                      : false
+                  }
+                  errorText={errors.currency?.value}
+                />
+                <RadioInput
+                  data={client_types}
+                  label={"Type Of Client"}
+                  value={values.client_type.value}
+                  onchange={(v) => {
+                    setFieldValue("client_type.value", v.value);
+                    setFieldValue("client_type.name", v.name);
+                  }}
+                />
+              </div>
+              <div className="w-full mt-2">
+                {error?.length > 0 && (
+                  <span className="w-full text-sm mt-2 text-[#ff0000]">
+                    {error}
+                  </span>
+                )}
+                {loading ? (
+                  <div className="rounded-lg bg-[#57BA52] py-[8.5px] w-full flex justify-center">
+                    <Loading />
+                  </div>
+                ) : (
+                  <button
+                    type="submit"
+                    className="w-full border border-[#57BA52] rounded-lg py-2 text-[#57BA52] relative bg-transparent px-5 font-medium uppercase text-gray-800 transition-colors before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-y-0 before:bg-[#57BA52] before:transition-transform before:duration-300 before:content-[''] hover:text-[#fff] before:hover:scale-y-100 before:rounded-lg"
+                  >
+                    Sign Up
+                  </button>
+                )}
+                <div className="text-[#49475A] text-center mt-3">
+                  Don’t have an account?{" "}
+                  <a
+                    href="/login"
+                    className="text-[#57BA52] underline decoration-[#57BA52]"
+                  >
+                    Sing In
+                  </a>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div className="w-full mt-8 mb-5 md:mb-0">
+            <p className="text-center md:text-left text-xs text-[#8A8A8A]">
+              © 2024 Welathmunshi. All Rights Reserved
+            </p>
           </div>
         </div>
-        <div className="mt-5">
-          <p className="text-sm text-gray">
-            Already sign in? then{" "}
-            <a
-              href="/login"
-              className="text-blueText font-semibold underline decoration-blueText"
-            >
-              Click here to Login{" "}
-            </a>
-          </p>
-        </div>
-        <div className="bg-[#F4F3FF] px-10 md:px-14 lg:px-[65px] py-6 md:py-9 rounded-md mt-2">
-          <form onSubmit={handleSubmit}>
-            <div className="w-full grid gap-5">
-              <div className="w-full grid md:grid-flow-col items-center md:grid-cols-10 gap-[13px]">
-                <label className="w-full text-base font-normal col-span-2 leading-tight text-[#111111] ">
-                  Phone Number
-                </label>
-                <div className={`md:col-span-2  lg:col-span-2 xl:col-span-1`}>
-                  <Select
-                    value={values.phone_type}
-                    id="phone_type"
-                    onChange={(v) => {
-                      setValues({
-                        ...values,
-                        phone_type: {
-                          label: v.label,
-                          value: v.value,
-                        },
-                      });
-                    }}
-                    options={phoneTypes}
-                    components={{ IndicatorSeparator: null }}
-                    styles={{
-                      container: (base) => ({
-                        ...base,
-                        fontSize: "16px",
-                      }),
-                      valueContainer: (base) => ({
-                        ...base,
-                        padding: "1px",
-                        paddingRight: "5px",
-                        paddingLeft: "5px",
-                      }),
-                      dropdownIndicator: (base) => ({
-                        ...base,
-                        padding: "0px",
-                        paddingRight: "1px",
-                      }),
-                    }}
-                    theme={(theme) => ({
-                      ...theme,
-                      borderRadius: 6,
-                      colors: {
-                        ...theme.colors,
-                        primary: "#A9A6CF",
-                      },
-                    })}
-                  />
-                  {/* <select
-                  value={values.phone_type}
-                  onChange={handleChange}
-                  className="bg-white !border-white ring-1 ring-[#A9A6CF] text-gray-900 text-sm rounded focus:!ring-2 focus:ring-[#A9A6CF] focus:!border-0 focus-visible:!border-white block w-full p-2 py-2"
-                >
-                  {phoneTypes.map((option, i) => (
-                    <option value={option.value} className="" key={i}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select> */}
-                </div>
-                <input
-                  value={values.phone_number}
-                  id="phone_number"
-                  onChange={handleChange}
-                  type="number"
-                  className={`h-full w-full md:col-span-2 rounded border-0 ring-[0.5px] ring-[#A9A6CF] bg-transparent px-[5px] py-2 text-base font-normal text-blue-gray-700 outline-0  focus:ring-2 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50`}
-                />
-              </div>
-              <RadioInput
-                data={client_types}
-                label={"Type Of Client"}
-                value={values.client_type.value}
-                onchange={(v) => {
-                  setFieldValue("client_type.value", v.value);
-                  setFieldValue("client_type.name", v.name);
-                }}
-              />
-              <Input
-                label={"First name"}
-                value={values.fname}
-                id="fname"
-                onchange={handleChange}
-              />
-              <Input
-                label={"Last name"}
-                value={values.lname}
-                id="lname"
-                onchange={handleChange}
-              />
-              <Input
-                label={"Email"}
-                inputClass="!col-span-4"
-                value={values.email}
-                id="email"
-                keytype="email"
-                onchange={handleChange}
-              />
-              <div className="w-full md:grid md:grid-flow-col md:items-center md:grid-cols-10 gap-[13px]">
-                <div className="md:col-span-2"></div>
-                <div className="md:col-span-4">
-                  <p>Main Contact</p>
-                </div>
-              </div>
-              <div className="w-full md:grid md:grid-flow-col md:items-center md:grid-cols-10 gap-[13px]">
-                <label className="w-full text-base font-normal col-span-2 leading-tight text-[#111111] ">
-                  DOB
-                </label>
-                <Select
-                  value={selectedDay}
-                  placeholder="Day:"
-                  onChange={(v) => {
-                    setSelectedDay(v);
-                    if (selectedMonth?.value && selectedYear?.value) {
-                      let day = v.value;
-                      let month = selectedMonth.value;
-                      let year = selectedYear.value;
-                      let date = `${day}-${month}-${year}`;
-                      setFieldValue("dob", new Date(date));
-                    }
-                  }}
-                  options={days}
-                  components={{ IndicatorSeparator: null }}
-                  styles={{
-                    container: (base) => ({
-                      ...base,
-                      fontSize: "16px",
-                    }),
-                    valueContainer: (base) => ({
-                      ...base,
-                      padding: "1px",
-                      paddingRight: "5px",
-                      paddingLeft: "5px",
-                    }),
-                    dropdownIndicator: (base) => ({
-                      ...base,
-                      padding: "0px",
-                      paddingRight: "1px",
-                    }),
-                  }}
-                  theme={(theme) => ({
-                    ...theme,
-                    borderRadius: 6,
-                    colors: {
-                      ...theme.colors,
-                      primary: "#A9A6CF",
-                    },
-                  })}
-                />
-                <Select
-                  value={selectedMonth}
-                  placeholder="Month:"
-                  onChange={(v) => {
-                    setSelectedMonth(v);
-                    // get list of days in selected month
-                    let year = selectedYear?.value ?? new Date().getFullYear();
-                    let month = v.value;
-                    const numDays = (y, m) => new Date(y, m, 0).getDate();
-                    let monthofDays = numDays(year, month);
-                    let damimonthDays = [];
-                    for (var i = 1; i <= monthofDays; i++) {
-                      damimonthDays.push({ label: i, value: i });
-                    }
-                    setDays(damimonthDays);
-                    if (selectedDay?.value && selectedDay.value > monthofDays)
-                      setSelectedDay({
-                        label: monthofDays,
-                        value: monthofDays,
-                      });
-                    if (selectedDay?.value && selectedYear?.value) {
-                      let day = selectedDay.value;
-                      let date = `${day}-${month}-${year}`;
-                      setFieldValue("dob", new Date(date));
-                    }
-                  }}
-                  options={months}
-                  components={{ IndicatorSeparator: null }}
-                  styles={{
-                    container: (base) => ({
-                      ...base,
-                      fontSize: "16px",
-                    }),
-                    valueContainer: (base) => ({
-                      ...base,
-                      padding: "1px",
-                      paddingRight: "5px",
-                      paddingLeft: "5px",
-                    }),
-                    dropdownIndicator: (base) => ({
-                      ...base,
-                      padding: "0px",
-                      paddingRight: "1px",
-                    }),
-                  }}
-                  theme={(theme) => ({
-                    ...theme,
-                    borderRadius: 6,
-                    colors: {
-                      ...theme.colors,
-                      primary: "#A9A6CF",
-                    },
-                  })}
-                />
-                <Select
-                  value={selectedYear}
-                  placeholder="Year:"
-                  onChange={(v) => {
-                    setSelectedYear(v);
-                    // get list of days in selected month
-                    let year = v.value;
-                    let month = selectedMonth?.value ?? new Date().getMonth();
-                    const numDays = (y, m) => new Date(y, m, 0).getDate();
-                    let monthofDays = numDays(year, month);
-                    let damimonthDays = [];
-                    for (var i = 1; i <= monthofDays; i++) {
-                      damimonthDays.push({ label: i, value: i });
-                    }
-                    setDays(damimonthDays);
-                    if (selectedDay?.value && selectedDay.value > monthofDays)
-                      setSelectedDay({
-                        label: monthofDays,
-                        value: monthofDays,
-                      });
-                    if (selectedMonth?.value && selectedDay?.value) {
-                      let day = selectedDay.value;
-                      let date = `${day}-${month}-${year}`;
-                      setFieldValue("dob", new Date(date));
-                    }
-                  }}
-                  options={years}
-                  components={{ IndicatorSeparator: null }}
-                  styles={{
-                    container: (base) => ({
-                      ...base,
-                      fontSize: "16px",
-                    }),
-                    valueContainer: (base) => ({
-                      ...base,
-                      padding: "1px",
-                      paddingRight: "5px",
-                      paddingLeft: "5px",
-                    }),
-                    dropdownIndicator: (base) => ({
-                      ...base,
-                      padding: "0px",
-                      paddingRight: "1px",
-                    }),
-                  }}
-                  theme={(theme) => ({
-                    ...theme,
-                    borderRadius: 6,
-                    colors: {
-                      ...theme.colors,
-                      primary: "#A9A6CF",
-                    },
-                  })}
-                />
-              </div>
-              <Dropdown
-                label="Currency"
-                options={currencies}
-                value={values.currency}
-                onchange={(v) => {
-                  console.log(v);
-                  setFieldValue("currency.label", v.label);
-                  setFieldValue("currency.value", v.value);
-                }}
-              />
-            </div>
-            <div className="w-full flex justify-end">
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-3 py-2 bg-navyBlue text-[#fff] rounded-[27px]"
-              >
-                Next
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 43 43"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="21.5545" cy="21.5425" r="21.2212" fill="white" />
-                  <g clipPath="url(#clip0_8_415)">
-                    <path
-                      opacity="0.984"
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M17.9244 12.0606C18.1008 12.0606 18.2772 12.0606 18.4535 12.0606C18.6146 12.1296 18.7674 12.2177 18.9121 12.3252C21.5871 15.0002 24.2621 17.6752 26.9371 20.3502C27.291 20.7719 27.3262 21.2187 27.0429 21.6906C24.2856 24.4479 21.5283 27.2052 18.771 29.9625C18.6619 30.017 18.5561 30.07 18.4535 30.1212C18.2772 30.1212 18.1008 30.1212 17.9244 30.1212C17.4635 29.8667 17.0696 29.5257 16.7427 29.0983C16.5251 28.7042 16.5369 28.3162 16.778 27.9342C19.0595 25.6585 21.3348 23.3774 23.6036 21.0909C21.3103 18.7917 19.0233 16.4871 16.7427 14.1771C16.5321 13.7955 16.5439 13.4192 16.778 13.0483C17.0543 12.772 17.3306 12.4957 17.6069 12.2194C17.716 12.1648 17.8218 12.1119 17.9244 12.0606Z"
-                      fill="#090071"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_8_415">
-                      <rect
-                        width="18.0606"
-                        height="18.0606"
-                        fill="white"
-                        transform="translate(12.9758 12.0606)"
-                      />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </button>
-            </div>
-          </form>
-        </div>
       </div>
-    </main>
+      <div className="flex-1 min-h-[650px]">
+        <div className="min-h-[650px] h-full rounded-md bg-auth-side-img bg-[length:100%_100%]"></div>
+      </div>
+    </div>
   );
 }
