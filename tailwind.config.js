@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import colors from "tailwindcss/colors";
+
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -15,6 +17,7 @@ module.exports = {
       },
     },
     colors: {
+      ...colors,
       navyBlue: "#090071",
       blueText: "#0B0084",
       gray: "#2C2C2CB2",

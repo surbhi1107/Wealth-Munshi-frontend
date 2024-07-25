@@ -1,14 +1,14 @@
 export default async function handler(req, res) {
-  let body = req.body;
+  let token = req.cookies?.["access- token"];
   let response = await fetch(
-    `${process.env.NEXT_AUTH_API_END_POINT}/user/register`,
+    `${process.env.NEXT_AUTH_API_END_POINT}/user/user-details`,
     {
       credentials: "include",
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Cookie: `access-token=${token}`,
       },
-      body: JSON.stringify(body),
     }
   );
   let res1 = await response.json();

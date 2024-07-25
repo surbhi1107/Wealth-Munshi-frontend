@@ -1,23 +1,32 @@
-import Cookies from "js-cookie";
-import { redirect } from "next/dist/server/api-utils";
-import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request) {
-  const accessToken = request.cookies?.get("access-token")?.value;
-  const role = request.cookies.get("role")?.value;
-  // console.log(accessToken);
+export default async function middleware(req, res) {
+  const token = req?.cookies?._parsed?.get("access-token")?.value;
+  const path = req.nextUrl.pathname;
+  const isPublicPath =
+    path === "/login" || path === "/register" || path?.includes("password");
+  const redirectLoginPath = (a) => {
+    return "/login";
+  };
+  const redirectPagePath = (a) => {
+    return "/";
+  };
 
-  // if (accessToken === undefined) {
-  //   return NextResponse.redirect("/login");
-  // } else
-  if (
-    accessToken?.length > 0 &&
-    (request.nextUrl.pathname.includes("password") ||
-      request.nextUrl.pathname === "/register" ||
-      request.nextUrl.pathname === "/login")
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
-  } else if (role === 1) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  } else return NextResponse.next();
+  if (req.nextUrl.pathname.startsWith("/_next/")) {
+    return NextResponse.next();
+  }
+  if (req.nextUrl.pathname.startsWith("/.next/")) {
+    return NextResponse.next();
+  }
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL(redirectLoginPath(path), req.nextUrl));
+  }
+  if (isPublicPath && token) {
+    return NextResponse.redirect(new URL(redirectPagePath(path), req.nextUrl));
+  }
 }
+
+export const config = {
+  matcher: ["/:path*"],
+};

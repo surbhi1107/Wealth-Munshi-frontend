@@ -1,12 +1,10 @@
 import Input from "@/components/Input";
-import RadioInput from "@/components/RadioInput";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import Dropdown from "@/components/Dropdown";
-import Select from "react-select";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import logo from "../Images/logo.png";
+import logo from "../public/Images/logo.png";
+import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading";
@@ -64,14 +62,20 @@ const login = () => {
   }, [values]);
 
   return (
-    <div className={`w-full h-full lg:min-h-screen md:flex px-5 py-5 bg-white`}>
+    <div className={`w-full h-full lg:min-h-screen md:flex px-5 py-5`}>
       <div className="lg:min-h-[650px] w-full items-center md:w-[20%] lg:w-[10%] md:flex-auto px-12">
         <div className="h-full flex flex-col justify-between">
           <div className="flex flex-col items-center">
             <div className="mb-8">
               <Image src={logo} priority={true} width="160" alt="logo" />
             </div>
-            <form onSubmit={handleSubmit} className="grid gap-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              className="grid gap-4"
+            >
               <div className="text-left mb-2">
                 <h2 className="text-[32px] font-semibold">
                   Welcome to Wealthmunshi 👋
@@ -121,7 +125,7 @@ const login = () => {
                 ) : (
                   <button
                     type="submit"
-                    className="w-full border border-[#57BA52] rounded-lg py-2 text-[#57BA52] relative bg-transparent px-5 font-medium uppercase text-gray-800 transition-colors before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-y-0 before:bg-[#57BA52] before:transition-transform before:duration-300 before:content-[''] hover:text-[#fff] before:hover:scale-y-100 before:rounded-lg"
+                    className="w-full border border-[#57BA52] rounded-lg py-2 text-[#57BA52] relative bg-transparent px-5 font-medium uppercase text-gray-800 transition-colors before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-y-0 before:bg-[#57BA52] before:transition-transform before:duration-300 before:content-[''] hover:text-white before:hover:scale-y-100 before:rounded-lg"
                   >
                     Sign In
                   </button>
@@ -145,19 +149,15 @@ const login = () => {
           </div>
         </div>
       </div>
-      <div className="flex-1 min-h-[650px]">
-        <div className="min-h-[650px] h-full rounded-md bg-auth-side-img bg-[length:100%_100%]"></div>
+      <div className="flex-1 lg:min-h-[650px]">
+        <Image
+          src={SideImage}
+          alt="side-image"
+          className="min-h-[650px] max-h-[100vh] h-full w-full"
+        />
       </div>
     </div>
   );
 };
 
 export default login;
-
-export function getServerSideProps(ctx) {
-  const authSession = ctx.req;
-  console.log(ctx.req.cookies);
-  return {
-    props: {},
-  };
-}

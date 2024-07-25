@@ -56,22 +56,6 @@ const Dropdown = ({
               },
             })}
           />
-          {/* <select
-            value={value.value}
-            onChange={onchange}
-            className="bg-white !border-white ring-1 ring-[#A9A6CF] text-gray-900 text-sm rounded focus:!ring-2 focus:ring-[#A9A6CF] focus:!border-0 focus-visible:!border-white block w-full p-2 py-2"
-          >
-            {options.map((option, i) => (
-              <option
-                value={option.value}
-                selected={option.value === value.value ? true : false}
-                className=""
-                key={i}
-              >
-                {option.name}
-              </option>
-            ))}
-          </select> */}
         </div>
         {error && (
           <span className="w-full text-sm mt-2 text-[#ff0000]">
