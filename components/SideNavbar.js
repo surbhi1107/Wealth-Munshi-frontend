@@ -18,6 +18,7 @@ const SideNavbar = () => {
     pathname?.includes("password");
   let token = Cookies.get("access-token");
   let user = Cookies.get("user");
+  if (user !== undefined) user = JSON.parse(user);
 
   const getuser = async () => {
     let response = await fetch(`/api/auth/get-user`, {
@@ -29,8 +30,7 @@ const SideNavbar = () => {
       body: JSON.stringify({}),
     });
     let res1 = await response.json();
-    console.log("-=", res1?.user);
-    if (res1?.success) Cookies.set("user", res1?.user);
+    if (res1?.success) Cookies.set("user", JSON.stringify(res1?.user));
   };
 
   useEffect(() => {

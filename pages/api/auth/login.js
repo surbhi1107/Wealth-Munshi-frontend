@@ -1,11 +1,10 @@
-
-import axios from 'axios';
+import axios from "axios";
 
 export default async function handler(req, res) {
   try {
     let body = req.body;
     let response = await axios.post(
-      `${process.env.NEXT_AUTH_API_END_POINT}/user/login`,
+      `${process.env.NEXT_PUBLIC_API_END_POINT}/user/login`,
       body,
       {
         withCredentials: true,
@@ -21,4 +20,3 @@ export default async function handler(req, res) {
     return res.status(500).send("something wrong");
   }
 }
-

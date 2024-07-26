@@ -7,18 +7,23 @@ import { useRouter } from "next/router";
 export default ({ children }) => {
   const [search, setSearch] = useState("");
   const router = useRouter();
+  let user = Cookies.get("user");
+  if (user !== undefined && typeof window !== "undefined")
+    user = JSON.parse(user);
 
   return (
     <div className={`flex h-screen`}>
+      {/* side navbar */}
       <SideNavbar />
       <div className="flex flex-col flex-1 overflow-y-auto">
-        <div className="w-full flex border-b border-b-[#54577A2E] relative">
+        {/* header */}
+        <div className="w-full flex border-b border-b-[#54577A2E]">
           <div className="w-full flex items-center justify-between h-[87px] pt-1 pb-3 px-3">
             <div className="w-[300px]">
               <Input
                 value={search}
-                placeholder="Search eg; (Goal,Resources)"
-                onchange={(v) => setSearch(v)}
+                placeholder="Search eg: (Goal,Resources)"
+                onchange={(e) => setSearch(e.target?.value)}
                 isSearch
               />
             </div>
@@ -27,6 +32,7 @@ export default ({ children }) => {
                 className="border rounded-full border-[#E6E6EB] p-2 text-[#54577A]"
                 onClick={() => {
                   Cookies.remove("access-token");
+                  Cookies.remove("user");
                   router.push("/login");
                 }}
               >
@@ -45,59 +51,39 @@ export default ({ children }) => {
                   />
                 </svg>
               </button>
-              <div className="flex items-center space-x-2">
+              {/* {user?.fname?.length > 0 ? (
                 <div className="w-[41.33px] h-[41.33px] flex justify-center items-center border rounded-full border-[#E6E6EB] text-white bg-[#57BA52]">
-                  SV
+                  {`${user?.fname?.charAt?.(0)}${user?.lname?.charAt?.(0)}`}
                 </div>
-                <p className="text-[#54577A]">Surbhi Vasoya</p>
-              </div>
+              ) : (
+                <></>
+              )}
+              {user?.fname?.length > 0 ? (
+                <div className="text-[#54577A]">{`${user?.fname} ${user?.lname}`}</div>
+              ) : (
+                <></>
+              )} */}
             </div>
           </div>
         </div>
         {children}
-      </div>
-      {/* <div className="w-full">
-        <div className="w-full flex items-center justify-between h-[88px] border-b border-b-[#54577A2E] pt-1 pb-3 px-3">
-          <div className="w-[300px]">
-            <Input
-              value={search}
-              placeholder="Search eg; (Goal,Resources)"
-              onchange={(v) => setSearch(v)}
-            />
-          </div>
-          <div className="flex items-center space-x-5">
-            <button
-              className="border rounded-full border-[#E6E6EB] p-2 text-[#54577A]"
-              onClick={() => {
-                Cookies.remove("access-token");
-                router.push("/login");
-              }}
+        {/* footer */}
+        <div className="w-full flex items-center justify-between border-t border-t-[#54577A2E] bg-[#F5FAF5] text-[#8A8A8A] pt-6 px-5 pb-11">
+          <p>© 2024 Welathmunshi. All Rights Reserved</p>
+          <div className="flex items-center space-x-3">
+            <a href="https://omnimaxsoftware.com/terms-of-use/" target="_blank">
+              Terms Of Service{" "}
+            </a>
+            <span>|</span>
+            <a
+              href="https://omnimaxsoftware.com/privacy-policy/"
+              target="_blank"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-                />
-              </svg>
-            </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-[41.33px] h-[41.33px] flex justify-center items-center border rounded-full border-[#E6E6EB] text-white bg-[#57BA52]">
-                SV
-              </div>
-              <p className="text-[#54577A]">Surbhi Vasoya</p>
-            </div>
+              Privacy Policy
+            </a>
           </div>
         </div>
-        {children}
-      </div> */}
+      </div>
     </div>
   );
 };

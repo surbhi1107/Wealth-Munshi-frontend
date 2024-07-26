@@ -14,7 +14,7 @@ const login = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const {
     values,
     errors,
@@ -40,14 +40,13 @@ const login = () => {
         password: values.password,
       };
       try {
-        const res = await axios.post("/api/auth/login", data, {
-          withCredentials: true,
+        const res = await axios.post("http://localhost:4001/user/login", data, {
           headers: {
             "Content-Type": "application/json",
           },
-        });   
-        if (res) {
-          Cookies.set("access-token", res.token);
+        });
+        if (res?.data?.success) {
+          Cookies.set("access-token", res.data?.token);
           router.push("/");
           setLoading(false);
         } else {
@@ -57,14 +56,15 @@ const login = () => {
       } catch (error) {
         console.error(error);
         setLoading(false);
-        setError(error.response ? error.response.data.error : "An error occurred");
+        setError(
+          error.response ? error.response.data.error : "An error occurred"
+        );
       }
     },
   });
   useMemo(() => {
     setError("");
   }, [values]);
-
 
   return (
     <div className={`w-full h-full lg:min-h-screen md:flex px-5 py-5`}>
@@ -74,8 +74,7 @@ const login = () => {
             <div className="mb-8">
               <Image src={logo} priority={true} width="160" alt="logo" />
             </div>
-            <form className="grid gap-4"
-              onSubmit={handleSubmit} >
+            <form className="grid gap-4" onSubmit={handleSubmit}>
               <div className="text-left mb-2">
                 <h2 className="text-[32px] font-semibold">
                   Welcome to Wealthmunshi 👋
@@ -120,7 +119,7 @@ const login = () => {
                 )}
                 {loading ? (
                   <div className="rounded-lg bg-[#57BA52] py-[8.5px] w-full flex justify-center">
-                    <Loading />
+                    <Loading isWhiteSpinner={true} />
                   </div>
                 ) : (
                   <button

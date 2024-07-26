@@ -1,18 +1,14 @@
 export default async function handler(req, res) {
-  let body = req.body;
-  let id = body?.id;
-  let token = body?.token;
+  let token = req.cookies?.["access-token"];
   let response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_END_POINT}/user/forgot-password-reset/${id}/${token}`,
+    `${process.env.NEXT_PUBLIC_API_END_POINT}/partner/get-all-partners`,
     {
       credentials: "include",
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
-      body: JSON.stringify({
-        newpassword: body.password,
-      }),
     }
   );
   let res1 = await response.json();

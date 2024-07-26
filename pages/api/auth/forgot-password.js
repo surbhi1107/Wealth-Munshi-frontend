@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   let body = req.body;
   let response = await fetch(
-    `${process.env.NEXT_AUTH_API_END_POINT}/user/sendemailLink`,
+    `${process.env.NEXT_PUBLIC_API_END_POINT}/user/sendemailLink`,
     {
       credentials: "include",
       method: "POST",

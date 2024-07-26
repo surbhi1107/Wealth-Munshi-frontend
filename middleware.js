@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export default async function middleware(req, res) {
   const token = req?.cookies?._parsed?.get("access-token")?.value;

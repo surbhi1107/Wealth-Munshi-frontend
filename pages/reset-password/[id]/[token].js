@@ -120,7 +120,7 @@ const ResetPassword = (props) => {
                 )}
                 {loading ? (
                   <div className="rounded-lg bg-[#57BA52] py-[8.5px] w-full flex justify-center">
-                    <Loading />
+                    <Loading isWhiteSpinner={true} />
                   </div>
                 ) : (
                   <button

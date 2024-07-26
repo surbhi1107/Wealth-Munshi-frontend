@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
   let token = req.cookies?.["access-token"];
-  let response = await fetch(`http://localhost:4001/user/user-details`, {
-    credentials: "include",
+  let response = await fetch(`http://localhost:4001/user/get-dashboard`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
