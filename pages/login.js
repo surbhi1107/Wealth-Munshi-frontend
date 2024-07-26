@@ -8,11 +8,13 @@ import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading";
+import axios from "axios";
 
 const login = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const {
     values,
     errors,
@@ -37,29 +39,32 @@ const login = () => {
         email: values.email,
         password: values.password,
       };
-      const res = await fetch("/api/auth/login", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data }),
-      });
-      let res1 = await res.json();
-      if (res1.success) {
-        Cookies.set("access-token", res1.token);
-        router.push("/");
+      try {
+        const res = await axios.post("/api/auth/login", data, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });   
+        if (res) {
+          Cookies.set("access-token", res.token);
+          router.push("/");
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setError(res.error);
+        }
+      } catch (error) {
+        console.error(error);
         setLoading(false);
-      } else {
-        setLoading(false);
-        setError(res1.error);
+        setError(error.response ? error.response.data.error : "An error occurred");
       }
     },
   });
-
   useMemo(() => {
     setError("");
   }, [values]);
+
 
   return (
     <div className={`w-full h-full lg:min-h-screen md:flex px-5 py-5`}>
@@ -69,13 +74,8 @@ const login = () => {
             <div className="mb-8">
               <Image src={logo} priority={true} width="160" alt="logo" />
             </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              className="grid gap-4"
-            >
+            <form className="grid gap-4"
+              onSubmit={handleSubmit} >
               <div className="text-left mb-2">
                 <h2 className="text-[32px] font-semibold">
                   Welcome to Wealthmunshi 👋
