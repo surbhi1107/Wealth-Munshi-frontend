@@ -3,6 +3,7 @@ import Loading from "@/components/Loading";
 import PopUp from "@/components/Popup";
 import Cookies from "js-cookie";
 import moment from "moment";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 let familyMemberType = [
@@ -313,6 +314,7 @@ let familyMemberType = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [partnerData, setPartnerData] = useState([]);
   const [contactData, setContactData] = useState([]);
   const [memberData, setMemberData] = useState([]);
@@ -402,7 +404,7 @@ export default function Home() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center">
                         <Loading />
@@ -410,7 +412,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : partnerData?.length === 0 ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center text-[#54577A] text-sm font-medium">
                         No Data Found
@@ -420,6 +422,7 @@ export default function Home() {
                 ) : (
                   partnerData?.map((data, index) => (
                     <tr
+                      height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
                       key={index}
                     >
@@ -551,7 +554,7 @@ export default function Home() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center">
                         <Loading />
@@ -559,7 +562,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : memberData?.length === 0 ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center text-[#54577A] text-sm font-medium">
                         No Data Found
@@ -569,6 +572,7 @@ export default function Home() {
                 ) : (
                   memberData?.map((data, index) => (
                     <tr
+                      height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
                       key={index}
                     >
@@ -697,7 +701,7 @@ export default function Home() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center">
                         <Loading />
@@ -705,7 +709,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : contactData?.length === 0 ? (
-                  <tr>
+                  <tr height="56px">
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center text-[#54577A] text-sm font-medium">
                         No Data Found
@@ -715,6 +719,7 @@ export default function Home() {
                 ) : (
                   contactData?.map((data, index) => (
                     <tr
+                      height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
                       key={index}
                     >

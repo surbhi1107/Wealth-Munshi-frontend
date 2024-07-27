@@ -85,6 +85,7 @@ li {
 
 table {
   border-collapse: collapse;
+  table-layout: fixed;
 }
 table th,table td {
   border: 1px solid #54577A2E; 

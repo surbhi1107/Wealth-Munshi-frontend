@@ -47,6 +47,7 @@ const login = () => {
         });
         if (res?.data?.success) {
           Cookies.set("access-token", res.data?.token);
+          Cookies.set("user", JSON.stringify(res.data?.user));
           router.push("/");
           setLoading(false);
         } else {

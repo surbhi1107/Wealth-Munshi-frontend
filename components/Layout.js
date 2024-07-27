@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 export default ({ children }) => {
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
+  const [show, setShow] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,12 +18,16 @@ export default ({ children }) => {
   }, []);
 
   return (
-    <div className={`flex h-screen`}>
+    <div className={`block md:flex h-screen bg-[#F5FAF5]`}>
       {/* side navbar */}
-      <SideNavbar />
-      <div className="flex flex-col flex-1 overflow-y-auto">
+      <SideNavbar show={show} setShow={setShow} />
+      <div
+        className={`${
+          show ? "hidden" : "flex"
+        } flex-col flex-1 overflow-y-auto mt-3 md:mt-0`}
+      >
         {/* header */}
-        <div className="w-full flex border-b border-b-[#54577A2E]">
+        <div className="w-full flex bg-white border-b border-b-[#54577A2E]">
           <div className="w-full flex items-center justify-between h-[87px] pt-1 pb-3 px-3">
             <div className="w-[300px]">
               <Input
@@ -69,7 +74,7 @@ export default ({ children }) => {
         </div>
         {children}
         {/* footer */}
-        <div className="w-full flex items-center justify-between border-t border-t-[#54577A2E] bg-[#F5FAF5] text-[#8A8A8A] pt-6 px-5 pb-11">
+        <div className="w-full md:flex md:items-center md:justify-between space-y-2 md:space-y-0 border-t border-t-[#54577A2E] bg-[#F5FAF5] text-[#8A8A8A] text-sm md:text-base pt-6 px-5 pb-11">
           <p>© 2024 Welathmunshi. All Rights Reserved</p>
           <div className="flex items-center space-x-3">
             <a href="https://omnimaxsoftware.com/terms-of-use/" target="_blank">
