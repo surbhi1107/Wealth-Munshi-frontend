@@ -1,15 +1,20 @@
 import Cookies from "js-cookie";
 import SideNavbar from "./SideNavbar";
 import Input from "./Input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 export default ({ children }) => {
   const [search, setSearch] = useState("");
+  const [user, setUser] = useState(null);
   const router = useRouter();
-  let user = Cookies.get("user");
-  if (user !== undefined && typeof window !== "undefined")
-    user = JSON.parse(user);
+
+  useEffect(() => {
+    const storedUser = Cookies.get("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <div className={`flex h-screen`}>
@@ -51,18 +56,14 @@ export default ({ children }) => {
                   />
                 </svg>
               </button>
-              {/* {user?.fname?.length > 0 ? (
+              {![null, undefined, ""].includes(user?.lname) && (
                 <div className="w-[41.33px] h-[41.33px] flex justify-center items-center border rounded-full border-[#E6E6EB] text-white bg-[#57BA52]">
                   {`${user?.fname?.charAt?.(0)}${user?.lname?.charAt?.(0)}`}
                 </div>
-              ) : (
-                <></>
               )}
-              {user?.fname?.length > 0 ? (
+              {![null, undefined, ""].includes(user?.fname) && (
                 <div className="text-[#54577A]">{`${user?.fname} ${user?.lname}`}</div>
-              ) : (
-                <></>
-              )} */}
+              )}
             </div>
           </div>
         </div>
