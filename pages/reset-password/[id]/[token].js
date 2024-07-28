@@ -35,28 +35,35 @@ const ResetPassword = (props) => {
         ),
     }),
     onSubmit: async (values) => {
-      setLoading(true);
-      setError("");
-      let data = {
-        password: values.password,
-        id: props?.id,
-        token: props?.token,
-      };
-      const res = await fetch("/api/auth/reset-password", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data }),
-      });
-      let res1 = await res.json();
-      if (res1.success) {
-        router.push("/login");
+      try {
+        setLoading(true);
+        setError("");
+        let data = {
+          password: values.password,
+          id: props?.id,
+          token: props?.token,
+        };
+        const res = await fetch("/api/auth/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...data }),
+        });
+        let res1 = await res.json();
+        if (res1.success) {
+          router.push("/login");
+          setLoading(false);
+        } else {
+          setError(res1.error);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error(error);
         setLoading(false);
-      } else {
-        setError(res1.error);
-        setLoading(false);
+        setError(
+          error.response ? error.response.data.error : "An error occurred"
+        );
       }
     },
   });

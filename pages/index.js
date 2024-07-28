@@ -320,6 +320,7 @@ export default function Home() {
   const [memberData, setMemberData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openPopUp, setOpenPopUp] = useState(false);
+  let ignore = false;
 
   const getData = async () => {
     setLoading(true);
@@ -342,7 +343,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getData();
+    if (!ignore) getData();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (

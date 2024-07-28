@@ -27,26 +27,33 @@ const ForgotPassword = () => {
       email: Yup.string().required("Email is required"),
     }),
     onSubmit: async (values) => {
-      setError("");
-      setLoading(true);
-      let data = {
-        email: values.email,
-      };
-      const res = await fetch("/api/auth/forgot-password", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data }),
-      });
-      let res1 = await res.json();
-      if (res1.success) {
-        setSuccessMsg(res1?.msg);
+      try {
+        setError("");
+        setLoading(true);
+        let data = {
+          email: values.email,
+        };
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...data }),
+        });
+        let res1 = await res.json();
+        if (res1.success) {
+          setSuccessMsg(res1?.msg);
+          setLoading(false);
+        } else {
+          setError(res1.error);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error(error);
         setLoading(false);
-      } else {
-        setError(res1.error);
-        setLoading(false);
+        setError(
+          error.response ? error.response.data.error : "An error occurred"
+        );
       }
     },
   });

@@ -128,7 +128,7 @@ export default function Register() {
       },
       phone_type: {
         label: "Home",
-        value: "home",
+        value: 1,
       },
       age_retire: "",
       life_expectancy: "",
@@ -155,35 +155,45 @@ export default function Register() {
       life_expectancy: Yup.string().required("Life expectancy is required"),
     }),
     onSubmit: async (values) => {
-      setLoading(true);
-      setError("");
-      let data = {
-        fname: values.fname,
-        lname: values.lname,
-        phone_type: values.phone_type.value,
-        phone_number: values.phone_number,
-        client_type: values.client_type.value,
-        email: values.email,
-        dob: values.dob,
-        currency: values.currency.value,
-        age_retire: values.age_retire,
-        life_expectancy: values.life_expectancy,
-      };
-      const res = await fetch("/api/auth/registration", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...data }),
-      });
-      let res1 = await res.json();
-      if (res1.success) {
-        router.push("/login");
+      try {
+        setLoading(true);
+        setError("");
+        let data = {
+          fname: values.fname,
+          lname: values.lname,
+          phone_type: values.phone_type.value,
+          phone_number: values.phone_number,
+          client_type: values.client_type.value,
+          email: values.email,
+          dob: values.dob,
+          currency: values.currency.value,
+          age_retire: values.age_retire,
+          life_expectancy: values.life_expectancy,
+        };
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_END_POINT}/user/register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...data }),
+          }
+        );
+        let res1 = await res.json();
+        if (res1.success) {
+          router.push("/login");
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setError(res1.error);
+        }
+      } catch (error) {
+        console.error(error);
         setLoading(false);
-      } else {
-        setLoading(false);
-        setError(res1.error);
+        setError(
+          error.response ? error.response.data.error : "An error occurred"
+        );
       }
     },
   });

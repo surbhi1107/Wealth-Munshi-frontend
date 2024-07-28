@@ -22,7 +22,6 @@ const SideNavbar = ({ show, setShow }) => {
 
   const getuser = async () => {
     let response = await fetch(`/api/auth/get-user`, {
-      credentials: "include",
       method: "POST",
       headers: {
         "Content-Type": "application/json",

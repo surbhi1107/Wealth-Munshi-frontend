@@ -8,7 +8,6 @@ import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading";
-import axios from "axios";
 
 const login = () => {
   const router = useRouter();
@@ -40,14 +39,20 @@ const login = () => {
         password: values.password,
       };
       try {
-        const res = await axios.post("http://localhost:4001/user/login", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (res?.data?.success) {
-          Cookies.set("access-token", res.data?.token);
-          Cookies.set("user", JSON.stringify(res.data?.user));
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_END_POINT}/user/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...data }),
+          }
+        );
+        let res = await response.json();
+        if (res?.success) {
+          Cookies.set("access-token", res?.token);
+          Cookies.set("user", JSON.stringify(res?.user));
           router.push("/");
           setLoading(false);
         } else {
