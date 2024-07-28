@@ -13,7 +13,7 @@ const RadioInput = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] !mb-4">
+        <label className="w-full text-base font-medium col-span-2 leading-tight text-[#54577A] !mb-4">
           {label}{" "}
           {required ? (
             <span className={`text-red-600 ${requireClass}`}>*</span>
@@ -22,7 +22,7 @@ const RadioInput = ({
           )}
         </label>
       )}
-      <div className="flex col-span-3 gap-3">
+      <div className="flex col-span-3 gap-3 mt-2">
         {data.map((v, i) => (
           <div key={i}>
             <div className="flex gap-2 items-center">

@@ -99,7 +99,7 @@ export default function Add(props) {
           life_expectancy: values.life_expectancy,
           gender: values.gender.value,
         };
-        const res = await fetch(`/api/family-member/add`, {
+        const res = await fetch(`/api/contact/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export default function Add(props) {
       <div className={`w-full space-y-6`}>
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-            Add New Family Member
+            Add New contact
           </h1>
           <div className="w-full flex items-center space-x-3">
             <div className="flex justify-center items-center w-9 h-9 bg-[#57BA52] rounded-full">
@@ -505,7 +505,7 @@ export default function Add(props) {
 }
 
 export const getServerSideProps = async (ctx) => {
-  if (!ctx?.query?.member_type) {
+  if (!ctx?.query?.contact_type) {
     return {
       redirect: {
         destination: "/",
@@ -513,9 +513,9 @@ export const getServerSideProps = async (ctx) => {
       },
     };
   }
-  let member_type =
-    ctx?.query?.member_type === undefined
+  let contact_type =
+    ctx?.query?.contact_type === undefined
       ? ""
-      : JSON.parse(ctx?.query?.member_type);
-  return { props: { state: member_type } };
+      : JSON.parse(ctx?.query?.contact_type);
+  return { props: { state: contact_type } };
 };

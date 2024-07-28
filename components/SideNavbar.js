@@ -3,15 +3,20 @@ import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 let Menus = [
-  { title: "Details", href: "/" },
-  { title: "Risk Profile", href: "/risk-profile" },
-  { title: "Goals", href: "/goals" },
-  { title: "Cashflow", href: "/cash-flow" },
-  { title: "Summary", href: "/summary" },
+  {
+    title: "Details",
+    href: "/",
+    pathnames: ["", "family-member", "partner", "contact"],
+  },
+  { title: "Risk Profile", href: "/risk-profile", pathnames: ["risk-profile"] },
+  { title: "Goals", href: "/goals", pathnames: ["goals"] },
+  { title: "Cashflow", href: "/cash-flow", pathnames: ["cash-flow"] },
+  { title: "Summary", href: "/summary", pathnames: ["summary"] },
 ];
 
 const SideNavbar = ({ show, setShow }) => {
   let pathname = usePathname();
+  let mainroute = pathname.split("/")?.[1];
   const isPublicPath =
     pathname === "/login" ||
     pathname === "/register" ||
@@ -91,7 +96,7 @@ const SideNavbar = ({ show, setShow }) => {
           <nav
             className={`${
               show ? "block" : "hidden"
-            } md:block py-4 pr-3 md:overflow-y-auto space-y-1`}
+            } md:block py-4 pr-3 md:overflow-y-auto space-y-3`}
           >
             {Menus.map((v, i) => (
               <a
@@ -100,15 +105,15 @@ const SideNavbar = ({ show, setShow }) => {
                 className="w-full flex items-center justify-start space-x-3 text-[#45486A] group"
               >
                 <span
-                  className={`hidden md:block w-[5px] h-11 rounded-tr-[5px] rounded-br-[5px] transition-colors duration-300 transform ${
-                    pathname === v.href
+                  className={`hidden md:block w-[5px] h-10 rounded-tr-[5px] rounded-br-[5px] transition-colors duration-300 transform ${
+                    v.pathnames.includes(mainroute)
                       ? "bg-[#57BA52]"
                       : "group-hover:bg-[#57BA52]"
                   }`}
                 ></span>
                 <div
-                  className={`w-full px-[9px] py-1 md:py-3 flex items-center rounded-[5px] gap-1 md:gap-0 transition-colors duration-300 transform ${
-                    pathname === v.href
+                  className={`w-full px-[9px] py-1 md:py-2 flex items-center rounded-[5px] gap-1 md:gap-0 transition-colors duration-300 transform ${
+                    v.pathnames.includes(mainroute)
                       ? "bg-white md:bg-[#57BA52] text-[#57BA52] md:text-white"
                       : "md:group-hover:bg-[#57BA52] group-hover:text-[#57BA52] md:group-hover:text-white"
                   }`}
@@ -119,7 +124,9 @@ const SideNavbar = ({ show, setShow }) => {
                     viewBox="0 0 24 24"
                     fill="none"
                     className={`group-hover:stroke-[#57BA52] md:group-hover:stroke-white ${
-                      pathname === v.href ? "stroke-white" : "stroke-[#45486A]"
+                      v.pathnames.includes(mainroute)
+                        ? "stroke-white"
+                        : "stroke-[#45486A]"
                     }`}
                     xmlns="http://www.w3.org/2000/svg"
                   >

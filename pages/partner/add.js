@@ -49,7 +49,6 @@ export default function Add(props) {
     handleSubmit,
   } = useFormik({
     initialValues: {
-      type: "",
       fname: "",
       mname: "",
       lname: "",
@@ -64,7 +63,6 @@ export default function Add(props) {
       },
     },
     validationSchema: Yup.object({
-      type: Yup.string(),
       fname: Yup.string().required("First Name is required"),
       mname: Yup.string().required("Middle Name is required"),
       lname: Yup.string().required("Last Name is required"),
@@ -88,7 +86,6 @@ export default function Add(props) {
         setLoading(true);
         setError("");
         let data = {
-          type: props?.state?.value,
           fname: values.fname,
           mname: values.mname,
           lname: values.lname,
@@ -99,7 +96,7 @@ export default function Add(props) {
           life_expectancy: values.life_expectancy,
           gender: values.gender.value,
         };
-        const res = await fetch(`/api/family-member/add`, {
+        const res = await fetch(`/api/partner/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -156,7 +153,7 @@ export default function Add(props) {
       <div className={`w-full space-y-6`}>
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-            Add New Family Member
+            Add New Partner
           </h1>
           <div className="w-full flex items-center space-x-3">
             <div className="flex justify-center items-center w-9 h-9 bg-[#57BA52] rounded-full">
@@ -503,19 +500,3 @@ export default function Add(props) {
     </Layout>
   );
 }
-
-export const getServerSideProps = async (ctx) => {
-  if (!ctx?.query?.member_type) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  let member_type =
-    ctx?.query?.member_type === undefined
-      ? ""
-      : JSON.parse(ctx?.query?.member_type);
-  return { props: { state: member_type } };
-};

@@ -321,6 +321,7 @@ export default function Home() {
   const [memberData, setMemberData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openPopUp, setOpenPopUp] = useState(false);
+  const [error, setError] = useState("");
   let ignore = false;
 
   const getData = async () => {
@@ -343,6 +344,87 @@ export default function Home() {
     }
   };
 
+  const deletepartner = async (_id) => {
+    try {
+      setLoading(true);
+      let response = await fetch(`/api/partner/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ partnerId: _id }),
+      });
+      let res1 = await response.json();
+      if (res1?.success) {
+        setLoading(false);
+        getData();
+      } else {
+        setLoading(false);
+        setPartnerData([]);
+      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setError(
+        error.response ? error.response.data.error : "An error occurred"
+      );
+    }
+  };
+
+  const deletecontact = async (_id) => {
+    try {
+      setLoading(true);
+      let response = await fetch(`/api/contact/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contactId: _id }),
+      });
+      let res1 = await response.json();
+      if (res1?.success) {
+        setLoading(false);
+        getData();
+      } else {
+        setLoading(false);
+        setPartnerData([]);
+      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setError(
+        error.response ? error.response.data.error : "An error occurred"
+      );
+    }
+  };
+
+  const deletemember = async (_id) => {
+    try {
+      setLoading(true);
+      let response = await fetch(`/api/family-member/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ memberId: _id }),
+      });
+      let res1 = await response.json();
+      if (res1?.success) {
+        setLoading(false);
+        getData();
+      } else {
+        setLoading(false);
+        setPartnerData([]);
+      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setError(
+        error.response ? error.response.data.error : "An error occurred"
+      );
+    }
+  };
+
   useEffect(() => {
     if (!ignore) getData();
     return () => {
@@ -359,7 +441,12 @@ export default function Home() {
             <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
               Client Household
             </h1>
-            <button className="w-full md:w-auto border border-[#57BA52] rounded-lg py-2 bg-transparent px-8 font-medium text-[#57BA52]">
+            <button
+              onClick={() => {
+                router.push("/partner/add");
+              }}
+              className="w-full md:w-auto border border-[#57BA52] rounded-lg py-2 bg-transparent px-8 font-medium text-[#57BA52]"
+            >
               Add Partner
             </button>
           </div>
@@ -425,7 +512,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : (
-                  partnerData?.map((data, index) => (
+                  partnerData?.map((v, index) => (
                     <tr
                       height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
@@ -435,26 +522,31 @@ export default function Home() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {`${data?.fname} ${data?.lname}`}
+                        {`${v?.fname} ${v?.lname}`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.type}
+                        {v?.type}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        DOB: {moment(data?.dob).format("DD/MM/YYYY")}
+                        DOB: {moment(v?.dob).format("DD/MM/YYYY")}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.age_retire}
+                        {v?.age_retire}
                       </td>
                       <td className={`py-5 px-3 whitespace-nowrap`}>
-                        {data?.life_expectancy}
+                        {v?.life_expectancy}
                       </td>
                       <td
                         className={`py-5 px-3 flex items-center justify-center space-x-3`}
                       >
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                          onClick={() => {}}
+                          onClick={() => {
+                            router.push({
+                              pathname: "/partner/update/",
+                              query: { partnerId: v._id },
+                            });
+                          }}
                         >
                           <svg
                             width="20"
@@ -491,7 +583,9 @@ export default function Home() {
                         </button>
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                          onClick={() => {}}
+                          onClick={() => {
+                            deletepartner(v?._id);
+                          }}
                         >
                           <svg
                             width="20"
@@ -575,7 +669,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : (
-                  memberData?.map((data, index) => (
+                  memberData?.map((v, index) => (
                     <tr
                       height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
@@ -585,25 +679,30 @@ export default function Home() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {`${data?.fname} ${data?.lname}`}
+                        {`${v?.fname} ${v?.lname}`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.type}
+                        {v?.type}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        DOB: {moment(data?.dob).format("DD/MM/YYYY")}
+                        DOB: {moment(v?.dob).format("DD/MM/YYYY")}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.age_retire}
+                        {v?.age_retire}
                       </td>
                       <td className={`py-5 px-3 whitespace-nowrap`}>
-                        {data?.life_expectancy}
+                        {v?.life_expectancy}
                       </td>
                       <td className={`py-5 px-3`}>
                         <div className="flex items-center justify-center space-x-3">
                           <button
                             className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                            onClick={() => {}}
+                            onClick={() => {
+                              router.push({
+                                pathname: "/family-member/update/",
+                                query: { memberId: v._id },
+                              });
+                            }}
                           >
                             <svg
                               width="20"
@@ -640,7 +739,9 @@ export default function Home() {
                           </button>
                           <button
                             className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                            onClick={() => {}}
+                            onClick={() => {
+                              deletemember(v?._id);
+                            }}
                           >
                             <svg
                               width="20"
@@ -722,7 +823,7 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : (
-                  contactData?.map((data, index) => (
+                  contactData?.map((v, index) => (
                     <tr
                       height="56px"
                       className={`bg-white text-[#54577A] text-sm font-medium`}
@@ -732,26 +833,31 @@ export default function Home() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {`${data?.fname} ${data?.lname}`}
+                        {`${v?.fname} ${v?.lname}`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.type}
+                        {v?.type}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        DOB: {moment(data?.dob).format("DD/MM/YYYY")}
+                        DOB: {moment(v?.dob).format("DD/MM/YYYY")}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {data?.age_retire}
+                        {v?.age_retire}
                       </td>
                       <td className={`py-5 px-3 whitespace-nowrap`}>
-                        {data?.life_expectancy}
+                        {v?.life_expectancy}
                       </td>
                       <td
                         className={`py-5 px-3 flex items-center justify-center space-x-3`}
                       >
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                          onClick={() => {}}
+                          onClick={() => {
+                            router.push({
+                              pathname: "/contact/update/",
+                              query: { contactId: v._id },
+                            });
+                          }}
                         >
                           <svg
                             width="20"
@@ -788,7 +894,9 @@ export default function Home() {
                         </button>
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
-                          onClick={() => {}}
+                          onClick={() => {
+                            deletecontact(v?._id);
+                          }}
                         >
                           <svg
                             width="20"
