@@ -119,9 +119,7 @@ const SideNavbar = ({ show, setShow }) => {
                     viewBox="0 0 24 24"
                     fill="none"
                     className={`group-hover:stroke-[#57BA52] md:group-hover:stroke-white ${
-                      pathname === v.href
-                        ? "stroke-[#57BA52]"
-                        : "stroke-[#45486A]"
+                      pathname === v.href ? "stroke-white" : "stroke-[#45486A]"
                     }`}
                     xmlns="http://www.w3.org/2000/svg"
                   >
@@ -154,7 +152,7 @@ const SideNavbar = ({ show, setShow }) => {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <span className="mx-2 text-sm font-medium">{v.title}</span>
+                  <span className="mx-2 font-medium">{v.title}</span>
                 </div>
               </a>
             ))}

@@ -7,12 +7,19 @@ const RadioInput = ({
   onchange,
   error,
   errorText,
+  required = false,
+  requireClass = "",
 }) => {
   return (
     <div className="w-full">
       {label && (
         <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] !mb-4">
-          {label}
+          {label}{" "}
+          {required ? (
+            <span className={`text-red-600 ${requireClass}`}>*</span>
+          ) : (
+            <></>
+          )}
         </label>
       )}
       <div className="flex col-span-3 gap-3">

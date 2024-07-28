@@ -72,7 +72,7 @@ export default ({ children }) => {
             </div>
           </div>
         </div>
-        {children}
+        <div className="p-5">{children}</div>
         {/* footer */}
         <div className="w-full md:flex md:items-center md:justify-between space-y-2 md:space-y-0 border-t border-t-[#54577A2E] bg-[#F5FAF5] text-[#8A8A8A] text-sm md:text-base pt-6 px-5 pb-11">
           <p>© 2024 Welathmunshi. All Rights Reserved</p>

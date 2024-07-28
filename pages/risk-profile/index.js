@@ -29,7 +29,7 @@ export default function RiskProfile() {
 
   return (
     <Layout>
-      <div className={`w-full bg-[#F5FAF5] p-5 space-y-6`}>
+      <div className={`w-full space-y-6`}>
         {/* Risk Details */}
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <div className="w-full mb-4">

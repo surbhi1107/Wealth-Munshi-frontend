@@ -12,6 +12,9 @@ const Input = ({
   isPassword = false,
   isSearch = false,
   placeholder = "",
+  require = false,
+  requireClass = "",
+  ...props
 }) => {
   let dummytype = isPassword ? "password" : keytype;
   const [type, setType] = useState(dummytype);
@@ -23,10 +26,15 @@ const Input = ({
     setShowPassword(!showPassword);
   };
   return (
-    <div className="w-full">
+    <div className="w-full space-y-1">
       {label && (
-        <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
-          {label}
+        <label className="w-full text-base font-medium col-span-2 leading-tight text-[#54577A]">
+          {label}{" "}
+          {require ? (
+            <span className={`text-red-600 ${requireClass}`}>*</span>
+          ) : (
+            <></>
+          )}
         </label>
       )}
       <div className="relative">
@@ -37,6 +45,7 @@ const Input = ({
           type={type}
           placeholder={placeholder}
           className={`w-full rounded border-0 ring-[0.5px] ring-[#CBCAD7] text-[#686677] bg-transparent px-2 py-2 text-base font-normal text-blue-gray-700 outline-0  focus:ring-2 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50 ${inputClass}`}
+          {...props}
         />
         {isPassword ? (
           <div className="absolute top-[10px] right-[10px] cursor-pointer">

@@ -158,8 +158,6 @@ const ResetPassword = (props) => {
 };
 
 export const getServerSideProps = async (ctx) => {
-  //   const [id, token] = query.slug;
-  console.log(ctx.params);
   return { props: ctx.params };
 };
 

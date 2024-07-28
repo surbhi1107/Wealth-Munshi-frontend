@@ -3,6 +3,7 @@ import Loading from "@/components/Loading";
 import PopUp from "@/components/Popup";
 import Cookies from "js-cookie";
 import moment from "moment";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -351,7 +352,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className={`w-full bg-[#F5FAF5] p-5 space-y-6`}>
+      <div className={`w-full space-y-6`}>
         {/* Partner Details */}
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <div className="w-full md:flex justify-between space-y-4 md:space-y-0">
@@ -831,18 +832,20 @@ export default function Home() {
         >
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-5">
             {familyMemberType.map((v, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  setOpenPopUp(false);
+              <Link
+                href={{
+                  pathname: `/family-member/add`,
+                  query: { member_type: JSON.stringify(v) },
                 }}
+                key={i}
+                as={`/family-member/add`}
                 className="w-full border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}
                 <p className="text-xs md:text-sm font-medium text-[#45486A] pt-1">
                   {v.name}
                 </p>
-              </button>
+              </Link>
             ))}
           </div>
         </PopUp>

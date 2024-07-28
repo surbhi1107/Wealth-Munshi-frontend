@@ -332,7 +332,13 @@ export default function Register() {
                     <input
                       value={values.phone_number}
                       id="phone_number"
-                      onChange={handleChange}
+                      onchange={(e) => {
+                        let val = e.target.value;
+                        let maxLength = 10;
+                        if (val.length <= maxLength) {
+                          setFieldValue("phone_number", val);
+                        }
+                      }}
                       type="number"
                       className={`w-full md:col-span-2 rounded border-0 ring-[0.5px] ring-[#CBCAD7] text-[#686677] bg-transparent px-2 py-2 text-base font-normal text-blue-gray-700 outline-0  focus:ring-2 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50`}
                     />
@@ -541,6 +547,7 @@ export default function Register() {
                     id="age_retire"
                     onchange={handleChange}
                     keytype={"number"}
+                    min={1}
                     error={
                       touched.age_retire && errors.age_retire ? true : false
                     }
@@ -552,6 +559,7 @@ export default function Register() {
                     id="life_expectancy"
                     onchange={handleChange}
                     keytype={"number"}
+                    min={1}
                     error={
                       touched.life_expectancy && errors.life_expectancy
                         ? true
@@ -565,9 +573,13 @@ export default function Register() {
                   options={currencies}
                   value={values.currency}
                   onchange={(v) => {
-                    console.log(v);
-                    setFieldValue("currency.label", v.label);
-                    setFieldValue("currency.value", v.value);
+                    setValues({
+                      ...values,
+                      currency: {
+                        name: v.name,
+                        value: v.value,
+                      },
+                    });
                   }}
                   error={
                     touched.currency?.value && errors.currency?.value
@@ -581,8 +593,13 @@ export default function Register() {
                   label={"Type Of Client"}
                   value={values.client_type.value}
                   onchange={(v) => {
-                    setFieldValue("client_type.value", v.value);
-                    setFieldValue("client_type.name", v.name);
+                    setValues({
+                      ...values,
+                      client_type: {
+                        name: v.name,
+                        value: v.value,
+                      },
+                    });
                   }}
                 />
               </div>
@@ -599,7 +616,7 @@ export default function Register() {
                 ) : (
                   <button
                     type="submit"
-                    className="w-full border border-[#57BA52] rounded-lg py-2 text-[#57BA52] relative bg-transparent px-5 font-medium uppercase text-gray-800 transition-colors before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-y-0 before:bg-[#57BA52] before:transition-transform before:duration-300 before:content-[''] hover:text-white before:hover:scale-y-100 before:rounded-lg"
+                    className="w-full border border-[#57BA52] rounded-lg py-2 text-[#57BA52] relative bg-transparent px-5 font-medium uppercase transition-colors before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-y-0 before:bg-[#57BA52] before:transition-transform before:duration-300 before:content-[''] hover:text-white before:hover:scale-y-100 before:rounded-lg"
                   >
                     Sign Up
                   </button>
