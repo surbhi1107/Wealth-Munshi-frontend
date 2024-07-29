@@ -10,6 +10,7 @@ import logo from "../public/Images/logo.png";
 import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Loading from "@/components/Loading";
+import Link from "next/link";
 
 let client_types = [
   { name: "individual", value: -1 },
@@ -622,13 +623,13 @@ export default function Register() {
                   </button>
                 )}
                 <div className="text-[#49475A] text-center mt-3">
-                  Don’t have an account?{" "}
-                  <a
+                  Already have an account?{" "}
+                  <Link
                     href="/login"
                     className="text-[#57BA52] underline decoration-[#57BA52]"
                   >
                     Sing In
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>

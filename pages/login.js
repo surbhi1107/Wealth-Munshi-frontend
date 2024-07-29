@@ -8,8 +8,9 @@ import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import Loading from "@/components/Loading";
+import Link from "next/link";
 
-const login = () => {
+const Login = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +54,9 @@ const login = () => {
         if (res?.success) {
           Cookies.set("access-token", res?.token);
           Cookies.set("user", JSON.stringify(res?.user));
-          router.push("/");
+          router.push({
+            pathname: "/",
+          });
           setLoading(false);
         } else {
           setLoading(false);
@@ -109,12 +112,12 @@ const login = () => {
                   isPassword
                 />
                 <span className="text-right">
-                  <a
+                  <Link
                     href="/forgot-password"
                     className="text-sm text-[#57BA52] mt-1"
                   >
                     Forgot Password?
-                  </a>
+                  </Link>
                 </span>
               </div>
               <div className="w-full mt-2">
@@ -136,13 +139,13 @@ const login = () => {
                   </button>
                 )}
                 <div className="text-[#49475A] text-center mt-3">
-                  Don’t have an account?{" "}
-                  <a
+                  Don&apos;t have an account?{" "}
+                  <Link
                     href="/register"
                     className="text-[#57BA52] underline decoration-[#57BA52]"
                   >
                     Sing up
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>
@@ -165,4 +168,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;

@@ -364,7 +364,7 @@ export default function RiskProfile() {
             }}
             className="w-auto rounded-lg px-3 py-2 text-white font-medium capitalize bg-[#57BA52] hover:opacity-90"
           >
-            OK, Let's Add Some Goals
+            OK, Let&apos;s Add Some Goals
           </button>
         </div>
         {/* <PopUp

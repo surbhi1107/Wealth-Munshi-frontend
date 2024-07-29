@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -50,7 +51,7 @@ const SideNavbar = ({ show, setShow }) => {
       >
         <div className="flex flex-col w-full md:w-64 text-gray-700 border-r border-r-[#54577A2E] flex-shrink-0">
           <div className="border-b border-b-[#54577A2E] px-8 pt-3 pb-[15px] flex flex-row items-center justify-between md:justify-center">
-            <a
+            <Link
               href="/"
               className="text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg focus:outline-none focus:shadow-outline"
             >
@@ -59,7 +60,7 @@ const SideNavbar = ({ show, setShow }) => {
                 src="/Images/logo.png"
                 alt=""
               />
-            </a>
+            </Link>
             <button
               className="rounded-lg md:hidden focus:outline-none focus:shadow-outline"
               onClick={() => setShow(!show)}
@@ -99,7 +100,7 @@ const SideNavbar = ({ show, setShow }) => {
             } md:block py-4 pr-3 md:overflow-y-auto space-y-3`}
           >
             {Menus.map((v, i) => (
-              <a
+              <Link
                 href={v.href}
                 key={i}
                 className="w-full flex items-center justify-start space-x-3 text-[#45486A] group"
@@ -161,7 +162,7 @@ const SideNavbar = ({ show, setShow }) => {
                   </svg>
                   <span className="mx-2 font-medium">{v.title}</span>
                 </div>
-              </a>
+              </Link>
             ))}
           </nav>
         </div>

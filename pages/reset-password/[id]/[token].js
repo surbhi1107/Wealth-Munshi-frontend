@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import logo from "../../../public/Images/logo.png";
-import SideImage from "../public/Images/auth_bg.png";
+import SideImage from "../../../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Loading from "@/components/Loading";
 

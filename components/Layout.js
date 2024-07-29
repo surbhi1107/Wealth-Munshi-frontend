@@ -3,8 +3,9 @@ import SideNavbar from "./SideNavbar";
 import Input from "./Input";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
-export default ({ children }) => {
+const Layout = ({ children }) => {
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
   const [show, setShow] = useState(false);
@@ -77,19 +78,24 @@ export default ({ children }) => {
         <div className="w-full md:flex md:items-center md:justify-between space-y-2 md:space-y-0 border-t border-t-[#54577A2E] bg-[#F5FAF5] text-[#8A8A8A] text-sm md:text-base pt-6 px-5 pb-11">
           <p>© 2024 Welathmunshi. All Rights Reserved</p>
           <div className="flex items-center space-x-3">
-            <a href="https://omnimaxsoftware.com/terms-of-use/" target="_blank">
+            <Link
+              href="https://omnimaxsoftware.com/terms-of-use/"
+              target="_blank"
+            >
               Terms Of Service{" "}
-            </a>
+            </Link>
             <span>|</span>
-            <a
+            <Link
               href="https://omnimaxsoftware.com/privacy-policy/"
               target="_blank"
             >
               Privacy Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default Layout;
