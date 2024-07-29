@@ -3,7 +3,6 @@ import RadioInput from "@/components/RadioInput";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Dropdown from "@/components/Dropdown";
-import Select from "react-select";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import logo from "../public/Images/logo.png";
@@ -121,6 +120,7 @@ export default function Register() {
         name: "individual",
         value: -1,
       },
+      trust_name: "",
       fname: "",
       lname: "",
       email: "",
@@ -153,7 +153,7 @@ export default function Register() {
       fname: Yup.string().required("First Name is required"),
       lname: Yup.string().required("Last Name is required"),
       email: Yup.string().required("Email is required"),
-      dob: Yup.string().required("Dob is required"),
+      dob: Yup.string(),
       currency: Yup.object({
         value: Yup.string().required("Required"),
         label: Yup.string(),
@@ -165,6 +165,7 @@ export default function Register() {
       age_retire: Yup.string().required("Age to retire is required"),
       life_expectancy: Yup.string().required("Life expectancy is required"),
       country_code: Yup.string(),
+      trust_name: Yup.string(),
       partner: Yup.object({
         fname: Yup.string(),
         lname: Yup.string(),
@@ -184,12 +185,12 @@ export default function Register() {
           phone_number: values.phone_number,
           client_type: values.client_type.value,
           email: values.email,
-          dob: values.dob,
           currency: values.currency.value,
-          age_retire: values.age_retire,
-          life_expectancy: values.life_expectancy,
-          ...(values.client_type?.value === 1
+          ...(values.client_type.value === -1 ? { dob: values.dob } : {}),
+          ...(values.client_type.value === 1
             ? {
+                age_retire: values.age_retire,
+                life_expectancy: values.life_expectancy,
                 partner_details: {
                   fname: values.partner.fname,
                   lname: values.partner.lname,
@@ -197,6 +198,11 @@ export default function Register() {
                   age_retire: values.partner.age_retire,
                   life_expectancy: values.partner.life_expectancy,
                 },
+              }
+            : {}),
+          ...(values.client_type?.value === 2
+            ? {
+                trust_name: values?.trust_name,
               }
             : {}),
         };
@@ -353,6 +359,24 @@ export default function Register() {
                     errorText={errors.client_type?.value}
                   />
                 </div>
+                {values?.client_type?.value === 2 ? (
+                  <div className="grid grid-cols-2 gap-5">
+                    <Input
+                      label={"Trust/Company name"}
+                      value={values.trust_name}
+                      id="trust_name"
+                      onchange={handleChange}
+                      error={
+                        touched.trust_name && values?.trust_name?.length === 0
+                          ? true
+                          : false
+                      }
+                      errorText={"Trust Name is Required"}
+                    />
+                  </div>
+                ) : (
+                  <></>
+                )}
                 <div className="">
                   <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
                     Phone Number
@@ -416,172 +440,187 @@ export default function Register() {
                     <></>
                   )}
                 </div>
-                <div className="">
-                  <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
-                    Date of Birth
-                  </label>
-                  <div className="grid grid-cols-3 gap-5">
-                    <Dropdown
-                      options={days}
-                      placeholder="Day:"
-                      value={selectedDay}
-                      onchange={(e) => {
-                        if (e.target.value === "") {
-                          setSelectedDay({});
-                          setFieldValue("dob", "");
-                        } else {
-                          let val =
-                            e.target.value?.length > 0
-                              ? parseInt(e.target.value)
-                              : "";
-                          let dummyfind = days?.find((v) => v.value === val);
-                          setSelectedDay({
-                            ...dummyfind,
-                          });
-                          if (selectedMonth?.value && selectedYear?.value) {
-                            let day = val;
-                            let month = selectedMonth.value;
-                            let year = selectedYear.value;
-                            let date = `${month}-${day}-${year}`;
-                            setFieldValue(
-                              "dob",
-                              moment(date).startOf("D").format()
-                            );
-                          }
-                        }
-                      }}
+                {values?.client_type?.value === -1 ? (
+                  <>
+                    <div className="">
+                      <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
+                        Date of Birth
+                      </label>
+                      <div className="grid grid-cols-3 gap-5">
+                        <Dropdown
+                          options={days}
+                          placeholder="Day:"
+                          value={selectedDay}
+                          onchange={(e) => {
+                            if (e.target.value === "") {
+                              setSelectedDay({});
+                              setFieldValue("dob", "");
+                            } else {
+                              let val =
+                                e.target.value?.length > 0
+                                  ? parseInt(e.target.value)
+                                  : "";
+                              let dummyfind = days?.find(
+                                (v) => v.value === val
+                              );
+                              setSelectedDay({
+                                ...dummyfind,
+                              });
+                              if (selectedMonth?.value && selectedYear?.value) {
+                                let day = val;
+                                let month = selectedMonth.value;
+                                let year = selectedYear.value;
+                                let date = `${month}-${day}-${year}`;
+                                setFieldValue(
+                                  "dob",
+                                  moment(date).startOf("D").format()
+                                );
+                              }
+                            }
+                          }}
+                        />
+                        <Dropdown
+                          options={months}
+                          placeholder="Month:"
+                          value={selectedMonth}
+                          onchange={(e) => {
+                            if (e.target.value === "") {
+                              setSelectedMonth({});
+                              setFieldValue("dob", "");
+                            } else {
+                              let val =
+                                e.target.value?.length > 0
+                                  ? parseInt(e.target.value)
+                                  : "";
+                              let dummyfind = months?.find(
+                                (v) => v.value === val
+                              );
+                              setSelectedMonth({
+                                ...dummyfind,
+                              });
+                              // get list of days in selected month
+                              let year =
+                                selectedYear?.value ?? new Date().getFullYear();
+                              let month = val;
+                              const numDays = (y, m) =>
+                                new Date(y, m, 0).getDate();
+                              let monthofDays = numDays(year, month);
+                              let damimonthDays = [];
+                              for (var i = 1; i <= monthofDays; i++) {
+                                damimonthDays.push({ label: i, value: i });
+                              }
+                              setDays(damimonthDays);
+                              if (
+                                selectedDay?.value &&
+                                selectedDay.value > monthofDays
+                              )
+                                setSelectedDay({
+                                  label: monthofDays,
+                                  value: monthofDays,
+                                });
+                              if (selectedDay?.value && selectedYear?.value) {
+                                let day = selectedDay.value;
+                                let date = `${month}-${day}-${year}`;
+                                setFieldValue(
+                                  "dob",
+                                  moment(date).startOf("D").format()
+                                );
+                              }
+                            }
+                          }}
+                        />
+                        <Dropdown
+                          options={years}
+                          placeholder="Year:"
+                          value={selectedYear}
+                          onchange={(e) => {
+                            if (e.target.value === "") {
+                              setSelectedYear({});
+                              setFieldValue("dob", "");
+                            } else {
+                              let val =
+                                e.target.value?.length > 0
+                                  ? parseInt(e.target.value)
+                                  : "";
+                              let dummyfind = years?.find(
+                                (v) => v.value === val
+                              );
+                              setSelectedYear({
+                                ...dummyfind,
+                              });
+                              // get list of days in selected month
+                              let year = val;
+                              let month =
+                                selectedMonth?.value ?? new Date().getMonth();
+                              const numDays = (y, m) =>
+                                new Date(y, m, 0).getDate();
+                              let monthofDays = numDays(year, month);
+                              let damimonthDays = [];
+                              for (var i = 1; i <= monthofDays; i++) {
+                                damimonthDays.push({ label: i, value: i });
+                              }
+                              setDays(damimonthDays);
+                              if (
+                                selectedDay?.value &&
+                                selectedDay.value > monthofDays
+                              )
+                                setSelectedDay({
+                                  label: monthofDays,
+                                  value: monthofDays,
+                                });
+                              if (selectedMonth?.value && selectedDay?.value) {
+                                let day = selectedDay.value;
+                                let date = `${month}-${day}-${year}`;
+                                setFieldValue(
+                                  "dob",
+                                  moment(date).startOf("D").format()
+                                );
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                      {touched.dob && errors.dob ? (
+                        <span className="w-full text-sm mt-2 text-[#ff0000]">
+                          {errors.dob}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </>
+                ) : values?.client_type?.value === 1 ? (
+                  <div className="grid grid-cols-2 gap-5">
+                    <Input
+                      label={"Age to retire"}
+                      value={values.age_retire}
+                      id="age_retire"
+                      onchange={handleChange}
+                      keytype={"number"}
+                      min={1}
+                      error={
+                        touched.age_retire && errors.age_retire ? true : false
+                      }
+                      errorText={errors.age_retire}
                     />
-                    <Dropdown
-                      options={months}
-                      placeholder="Month:"
-                      value={selectedMonth}
-                      onchange={(e) => {
-                        if (e.target.value === "") {
-                          setSelectedMonth({});
-                          setFieldValue("dob", "");
-                        } else {
-                          let val =
-                            e.target.value?.length > 0
-                              ? parseInt(e.target.value)
-                              : "";
-                          let dummyfind = months?.find((v) => v.value === val);
-                          setSelectedMonth({
-                            ...dummyfind,
-                          });
-                          // get list of days in selected month
-                          let year =
-                            selectedYear?.value ?? new Date().getFullYear();
-                          let month = val;
-                          const numDays = (y, m) => new Date(y, m, 0).getDate();
-                          let monthofDays = numDays(year, month);
-                          let damimonthDays = [];
-                          for (var i = 1; i <= monthofDays; i++) {
-                            damimonthDays.push({ label: i, value: i });
-                          }
-                          setDays(damimonthDays);
-                          if (
-                            selectedDay?.value &&
-                            selectedDay.value > monthofDays
-                          )
-                            setSelectedDay({
-                              label: monthofDays,
-                              value: monthofDays,
-                            });
-                          if (selectedDay?.value && selectedYear?.value) {
-                            let day = selectedDay.value;
-                            let date = `${month}-${day}-${year}`;
-                            setFieldValue(
-                              "dob",
-                              moment(date).startOf("D").format()
-                            );
-                          }
-                        }
-                      }}
-                    />
-                    <Dropdown
-                      options={years}
-                      placeholder="Year:"
-                      value={selectedYear}
-                      onchange={(e) => {
-                        if (e.target.value === "") {
-                          setSelectedYear({});
-                          setFieldValue("dob", "");
-                        } else {
-                          let val =
-                            e.target.value?.length > 0
-                              ? parseInt(e.target.value)
-                              : "";
-                          let dummyfind = years?.find((v) => v.value === val);
-                          setSelectedYear({
-                            ...dummyfind,
-                          });
-                          // get list of days in selected month
-                          let year = val;
-                          let month =
-                            selectedMonth?.value ?? new Date().getMonth();
-                          const numDays = (y, m) => new Date(y, m, 0).getDate();
-                          let monthofDays = numDays(year, month);
-                          let damimonthDays = [];
-                          for (var i = 1; i <= monthofDays; i++) {
-                            damimonthDays.push({ label: i, value: i });
-                          }
-                          setDays(damimonthDays);
-                          if (
-                            selectedDay?.value &&
-                            selectedDay.value > monthofDays
-                          )
-                            setSelectedDay({
-                              label: monthofDays,
-                              value: monthofDays,
-                            });
-                          if (selectedMonth?.value && selectedDay?.value) {
-                            let day = selectedDay.value;
-                            let date = `${month}-${day}-${year}`;
-                            setFieldValue(
-                              "dob",
-                              moment(date).startOf("D").format()
-                            );
-                          }
-                        }
-                      }}
+                    <Input
+                      label={"Life expectancy"}
+                      value={values.life_expectancy}
+                      id="life_expectancy"
+                      onchange={handleChange}
+                      keytype={"number"}
+                      min={1}
+                      error={
+                        touched.life_expectancy && errors.life_expectancy
+                          ? true
+                          : false
+                      }
+                      errorText={errors.life_expectancy}
                     />
                   </div>
-                  {touched.dob && errors.dob ? (
-                    <span className="w-full text-sm mt-2 text-[#ff0000]">
-                      {errors.dob}
-                    </span>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-5">
-                  <Input
-                    label={"Age to retire"}
-                    value={values.age_retire}
-                    id="age_retire"
-                    onchange={handleChange}
-                    keytype={"number"}
-                    min={1}
-                    error={
-                      touched.age_retire && errors.age_retire ? true : false
-                    }
-                    errorText={errors.age_retire}
-                  />
-                  <Input
-                    label={"Life expectancy"}
-                    value={values.life_expectancy}
-                    id="life_expectancy"
-                    onchange={handleChange}
-                    keytype={"number"}
-                    min={1}
-                    error={
-                      touched.life_expectancy && errors.life_expectancy
-                        ? true
-                        : false
-                    }
-                    errorText={errors.life_expectancy}
-                  />
-                </div>
+                ) : (
+                  <></>
+                )}
 
                 <Dropdown
                   label="Currency"
@@ -741,11 +780,12 @@ export default function Register() {
           </div>
         </div>
       </div>
-      <div className="flex-1 lg:min-h-[650px]">
-        <Image
-          src={SideImage}
-          className="min-h-[650px] lg:max-h-fit h-full w-full"
-        />
+      <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
+        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[30px] md:text-[45px] font-bold text-white p-[20px]">
+          Lorem Ipsum is simply dummy text of the printing and typesetting
+          industry. Lorem Ipsum has been the industry's standard dummy text ever
+          since the 1500s.
+        </div>
       </div>
       <ToastContainer />
     </div>

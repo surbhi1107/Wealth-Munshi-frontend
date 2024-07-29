@@ -92,7 +92,7 @@ const ResetPassword = (props) => {
 
   return (
     <div className={`w-full h-full min-h-screen md:flex px-5 py-5`}>
-      <div className="lg:min-h-[650px] w-full items-center md:w-[20%] lg:w-[10%] flex-auto px-12">
+      <div className="lg:min-h-[650px] w-full items-center md:w-[20%] lg:w-[10%] xl:w-0 flex-auto px-6">
         <div className="h-full flex flex-col justify-between">
           <div className="flex flex-col items-center">
             <div className="mb-8">
@@ -160,11 +160,12 @@ const ResetPassword = (props) => {
           </div>
         </div>
       </div>
-      <div className="flex-1 lg:min-h-[650px]">
-        <Image
-          src={SideImage}
-          className="min-h-[650px] max-h-screen h-full w-full"
-        />
+      <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
+        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[30px] md:text-[45px] font-bold text-white p-[20px]">
+          Lorem Ipsum is simply dummy text of the printing and typesetting
+          industry. Lorem Ipsum has been the industry's standard dummy text ever
+          since the 1500s.
+        </div>
       </div>
       <ToastContainer />
     </div>

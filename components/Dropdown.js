@@ -24,7 +24,7 @@ const Dropdown = ({
           <select
             value={value.value}
             onChange={onchange}
-            className={`w-full h-[40px] block px-1.5 bg-white !border-white ring-[0.5px] ring-[#CBCAD7] text-[#A1A1AA] text-base rounded focus:!ring-2 focus:ring-[#A9A6CF] focus:!border-0 focus-visible:!outline-none ${dropdownClass}`}
+            className={`w-full h-[40px] block px-1.5 bg-white !border-white ring-[0.5px] ring-[#CBCAD7] text-[#686677] text-base rounded focus:!ring-2 focus:ring-[#A9A6CF] focus:!border-0 focus-visible:!outline-none ${dropdownClass}`}
           >
             {placeholder?.length > 0 ? (
               <option value="">{placeholder}</option>
