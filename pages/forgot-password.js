@@ -137,10 +137,9 @@ const ForgotPassword = () => {
         </div>
       </div>
       <div className="flex-1 bg-[#57BA52] rounded-[20px] p-[20px]">
-        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[30px] md:text-[45px] font-bold text-white p-[20px]">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s.
+        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]" style={{ backgroundColor: '#B7E9F640', backdropFilter: 'contrast(75%)',     border: "1px solid" }}>
+        Start your journey by one click, explore
+your wealth!
         </div>
       </div>
       <ToastContainer />
