@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import * as cookie from "cookie";
 
 let riskData = [
   {
@@ -58,3 +59,18 @@ export default function RiskProfile() {
     </Layout>
   );
 }
+
+export const getServerSideProps = async (ctx) => {
+  let newcookies = ctx.req.headers.cookie;
+  newcookies = cookie.parse(newcookies);
+  let user = JSON.parse(newcookies?.user ?? "");
+  if (user?.dob === undefined || user?.dob?.length === 0) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return { props: { user } };
+};

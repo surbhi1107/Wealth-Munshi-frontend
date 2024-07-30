@@ -9,7 +9,26 @@ const Layout = ({ children }) => {
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
   const [show, setShow] = useState(false);
+  const [partnerName, setPartnerName] = useState("");
   const router = useRouter();
+
+  const getPartner = async () => {
+    try {
+      let response = await fetch(`/api/partner/get-user-partner`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      let res1 = await response.json();
+      if (res1?.success) {
+        let name = `${res1?.partner?.fname} ${res1?.partner?.lname}`;
+        setPartnerName(name);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const storedUser = Cookies.get("user");
@@ -17,6 +36,10 @@ const Layout = ({ children }) => {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
+  useEffect(() => {
+    if (user?.client_type === 1) getPartner();
+  }, [user]);
 
   return (
     <div className={`block md:flex h-screen bg-[#F5FAF5]`}>
@@ -63,12 +86,27 @@ const Layout = ({ children }) => {
                 </svg>
               </button>
               {![null, undefined, ""].includes(user?.lname) && (
-                <div className="w-[41.33px] h-[41.33px] flex justify-center items-center border rounded-full border-[#E6E6EB] text-white bg-[#57BA52]">
+                <div className="w-[41.33px] h-[41.33px] flex justify-center items-center uppercase border rounded-full border-[#E6E6EB] text-white bg-[#57BA52]">
                   {`${user?.fname?.charAt?.(0)}${user?.lname?.charAt?.(0)}`}
                 </div>
               )}
-              {![null, undefined, ""].includes(user?.fname) && (
-                <div className="text-[#54577A]">{`${user?.fname} ${user?.lname}`}</div>
+              {user?.client_type === 2 ? (
+                <div>
+                  {![null, undefined, ""].includes(user?.fname) && (
+                    <span className="text-[#54577A]">{`Trustees of ${user?.fname} ${user?.lname}`}</span>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  {![null, undefined, ""].includes(user?.fname) && (
+                    <span className="text-[#54577A]">{`${user?.fname} ${user?.lname}`}</span>
+                  )}
+                  {user?.client_type === 1 && partnerName?.length > 0 ? (
+                    <span className="text-[#54577A]">{` & ${partnerName}`}</span>
+                  ) : (
+                    <></>
+                  )}
+                </div>
               )}
             </div>
           </div>

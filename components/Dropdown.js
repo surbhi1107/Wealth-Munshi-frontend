@@ -10,6 +10,7 @@ const Dropdown = ({
   error,
   errorText,
 }) => {
+  let newVal = options.find((v) => v?.value === value?.value) ?? {};
   return (
     <>
       <div className="w-full">
@@ -22,7 +23,7 @@ const Dropdown = ({
         )}
         <div className={`${dropdownOuterClass} mt-1`}>
           <select
-            value={value.value}
+            value={newVal?.value}
             onChange={onchange}
             className={`w-full h-[40px] block px-1.5 bg-white !border-white ring-[0.5px] ring-[#CBCAD7] text-[#686677] text-base rounded focus:!ring-2 focus:ring-[#A9A6CF] focus:!border-0 focus-visible:!outline-none ${dropdownClass}`}
           >
@@ -34,7 +35,7 @@ const Dropdown = ({
             {options.map((option, i) => (
               <option
                 value={option.value}
-                selected={option.value === value.value ? true : false}
+                selected={option.value === newVal.value ? true : false}
                 className=""
                 key={i}
               >

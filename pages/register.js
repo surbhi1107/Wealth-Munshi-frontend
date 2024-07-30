@@ -6,98 +6,21 @@ import Dropdown from "@/components/Dropdown";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import logo from "../public/Images/logo.png";
-import SideImage from "../public/Images/auth_bg.png";
 import { useRouter } from "next/router";
 import Loading from "@/components/Loading";
 import Link from "next/link";
 import moment from "moment";
 import { toast, ToastContainer } from "react-toastify";
-
-let client_types = [
-  { label: "individual", value: -1 },
-  { label: "couple", value: 1 },
-  { label: "trust/company", value: 2 },
-];
-
-let currencies = [
-  { label: "Afghan Afghani", value: "AFA" },
-  { label: "Albanian Lek", value: "ALL" },
-  { label: "Algerian Dinar", value: "DZD" },
-  { label: "Angolan Kwanza", value: "AOA" },
-  { label: "Argentine Peso", value: "ARS" },
-  { label: "Armenian Dram", value: "AMD" },
-  { label: "Aruban Florin", value: "AWG" },
-  { label: "Australian Dollar", value: "AUD" },
-  { label: "Azerbaijani Manat", value: "AZN" },
-  { label: "Bahamian Dollar", value: "BSD" },
-  { label: "Bahraini Dinar", value: "BHD" },
-  { label: "Bangladeshi Taka", value: "BDT" },
-  { label: "Barbadian Dollar", value: "BBD" },
-  { label: "Belarusian Ruble", value: "BYR" },
-  { label: "Belgian Franc", value: "BEF" },
-  { label: "Belize Dollar", value: "BZD" },
-  { label: "Bermudan Dollar", value: "BMD" },
-  { label: "Bhutanese Ngultrum", value: "BTN" },
-  { label: "Bitcoin", value: "BTC" },
-  { label: "Bolivian Boliviano", value: "BOB" },
-  { label: "Bosnia-Herzegovina Convertible Mark", value: "BAM" },
-  { label: "Botswanan Pula", value: "BWP" },
-  { label: "Brazilian Real", value: "BRL" },
-  { label: "British Pound Sterling", value: "GBP" },
-  { label: "Brunei Dollar", value: "BND" },
-  { label: "Bulgarian Lev", value: "BGN" },
-  { label: "Burundian Franc", value: "BIF" },
-  { label: "Cambodian Riel", value: "KHR" },
-  { label: "Canadian Dollar", value: "CAD" },
-  { label: "Cape Verdean Escudo", value: "CVE" },
-  { label: "Cayman Islands Dollar", value: "KYD" },
-  { label: "CFA Franc BCEAO", value: "XOF" },
-  { label: "CFA Franc BEAC", value: "XAF" },
-  { label: "CFP Franc", value: "XPF" },
-  { label: "Chilean Peso", value: "CLP" },
-  { label: "Chilean Unit of Account", value: "CLF" },
-  { label: "Chinese Yuan", value: "CNY" },
-  { label: "Colombian Peso", value: "COP" },
-  { label: "Comorian Franc", value: "KMF" },
-  { label: "Congolese Franc", value: "CDF" },
-  { label: "Costa Rican Colón", value: "CRC" },
-  { label: "Croatian Kuna", value: "HRK" },
-  { label: "Cuban Convertible Peso", value: "CUC" },
-  { label: "Czech Republic Koruna", value: "CZK" },
-  { label: "Danish Krone", value: "DKK" },
-  { label: "Djiboutian Franc", value: "DJF" },
-  { label: "Dominican Peso", value: "DOP" },
-  { label: "East Caribbean Dollar", value: "XCD" },
-  { label: "Egyptian Pound", value: "EGP" },
-  { label: "Eritrean Nakfa", value: "ERN" },
-  { label: "Estonian Kroon", value: "EEK" },
-  { label: "Ethiopian Birr", value: "ETB" },
-  { label: "Euro", value: "EUR" },
-];
-
-let phoneTypes = [
-  { label: "Home", value: 1 },
-  { label: "Work", value: 2 },
-  { label: "Mobile", value: 3 },
-];
-
-let months = [
-  { label: "January", value: 1 },
-  { label: "February", value: 2 },
-  { label: "March", value: 3 },
-  { label: "April", value: 4 },
-  { label: "May", value: 5 },
-  { label: "Jun", value: 6 },
-  { label: "July", value: 7 },
-  { label: "August", value: 8 },
-  { label: "September", value: 9 },
-  { label: "Octomber", value: 10 },
-  { label: "November", value: 11 },
-  { label: "December", value: 12 },
-];
+import jsonData from "../data.json";
 
 export default function Register() {
   const router = useRouter();
+  let client_types = jsonData.client_types ?? [];
+  let currencies = jsonData.currencies ?? [];
+  let phoneTypes = jsonData.phoneTypes ?? [];
+  let months = jsonData.months ?? [];
+  const [lifeExpectancies, setLifeExpectancies] = useState([]);
+  const [ages, setAges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [years, setYears] = useState([]);
   const [days, setDays] = useState([]);
@@ -105,6 +28,8 @@ export default function Register() {
   const [selectedMonth, setSelectedMonth] = useState({});
   const [selectedDay, setSelectedDay] = useState({});
   const [error, setError] = useState("");
+  let ignore = false;
+
   const {
     values,
     errors,
@@ -133,15 +58,27 @@ export default function Register() {
         label: "Home",
         value: 1,
       },
-      age_retire: "",
-      life_expectancy: "",
+      age_retire: {
+        label: "65",
+        value: 65,
+      },
+      life_expectancy: {
+        label: "85",
+        value: 85,
+      },
       country_code: "",
       partner: {
         fname: "",
         lname: "",
         email: "",
-        age_retire: "",
-        life_expectancy: "",
+        age_retire: {
+          label: "65",
+          value: 65,
+        },
+        life_expectancy: {
+          label: "85",
+          value: 85,
+        },
       },
     },
     validationSchema: Yup.object({
@@ -162,16 +99,28 @@ export default function Register() {
         value: Yup.string().required("Required"),
         label: Yup.string(),
       }),
-      age_retire: Yup.string(),
-      life_expectancy: Yup.string(),
+      age_retire: Yup.object({
+        value: Yup.string().required("Required"),
+        label: Yup.string(),
+      }),
+      life_expectancy: Yup.object({
+        value: Yup.string().required("Required"),
+        label: Yup.string(),
+      }),
       country_code: Yup.string(),
       trust_name: Yup.string(),
       partner: Yup.object({
         fname: Yup.string(),
         lname: Yup.string(),
         email: Yup.string(),
-        age_retire: Yup.string(),
-        life_expectancy: Yup.string(),
+        age_retire: Yup.object({
+          value: Yup.string().required("Required"),
+          label: Yup.string(),
+        }),
+        life_expectancy: Yup.object({
+          value: Yup.string().required("Required"),
+          label: Yup.string(),
+        }),
       }),
     }),
     onSubmit: async (values) => {
@@ -182,6 +131,7 @@ export default function Register() {
           fname: values.fname,
           lname: values.lname,
           phone_type: values.phone_type.value,
+          country_code: values.country_code,
           phone_number: values.phone_number,
           client_type: values.client_type.value,
           email: values.email,
@@ -189,14 +139,14 @@ export default function Register() {
           ...(values.client_type.value === -1 ? { dob: values.dob } : {}),
           ...(values.client_type.value === 1
             ? {
-                age_retire: values.age_retire,
-                life_expectancy: values.life_expectancy,
+                age_retire: values.age_retire?.value,
+                life_expectancy: values.life_expectancy?.value,
                 partner_details: {
                   fname: values.partner.fname,
                   lname: values.partner.lname,
                   email: values.partner.email,
-                  age_retire: values.partner.age_retire,
-                  life_expectancy: values.partner.life_expectancy,
+                  age_retire: values.partner.age_retire?.value,
+                  life_expectancy: values.partner.life_expectancy?.value,
                 },
               }
             : {}),
@@ -271,7 +221,25 @@ export default function Register() {
   };
 
   useEffect(() => {
-    getYears();
+    if (!ignore) {
+      getYears();
+      let dummylifeexpectancy = [];
+      let dummyage = [];
+      for (let i = 50; i <= 100; i++) {
+        dummylifeexpectancy = [
+          ...dummylifeexpectancy,
+          { label: `${i}`, value: i },
+        ];
+      }
+      for (let i = 1; i <= 100; i++) {
+        dummyage = [...dummyage, { label: `${i}`, value: i }];
+      }
+      setLifeExpectancies(dummylifeexpectancy);
+      setAges(dummyage);
+    }
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useMemo(() => {
@@ -591,30 +559,49 @@ export default function Register() {
                   </>
                 ) : values?.client_type?.value === 1 ? (
                   <div className="grid grid-cols-2 gap-5">
-                    <Input
+                    <Dropdown
                       label={"Age to retire"}
+                      options={ages}
                       value={values.age_retire}
-                      id="age_retire"
-                      onchange={handleChange}
-                      keytype={"number"}
-                      min={1}
+                      onchange={(e) => {
+                        let val = e.target.value;
+                        let dummyfind = ages?.find((v) => v.value === val);
+                        setValues({
+                          ...values,
+                          age_retire: {
+                            label: dummyfind.label,
+                            value: dummyfind.value,
+                          },
+                        });
+                      }}
                       error={
-                        touched.age_retire && values.age_retire?.length === 0
+                        touched.age_retire &&
+                        values.age_retire?.label?.length === 0
                           ? true
                           : false
                       }
                       errorText={"Age retire is Required"}
                     />
-                    <Input
+                    <Dropdown
                       label={"Life expectancy"}
+                      options={lifeExpectancies}
                       value={values.life_expectancy}
-                      id="life_expectancy"
-                      onchange={handleChange}
-                      keytype={"number"}
-                      min={1}
+                      onchange={(e) => {
+                        let val = e.target.value;
+                        let dummyfind = lifeExpectancies?.find(
+                          (v) => v.value === val
+                        );
+                        setValues({
+                          ...values,
+                          life_expectancy: {
+                            label: dummyfind.label,
+                            value: dummyfind.value,
+                          },
+                        });
+                      }}
                       error={
-                        touched.life_expectancy &&
-                        values.life_expectancy?.length === 0
+                        touched.life_expectancy?.label &&
+                        values.life_expectancy?.label?.length === 0
                           ? true
                           : false
                       }
@@ -624,7 +611,6 @@ export default function Register() {
                 ) : (
                   <></>
                 )}
-
                 <Dropdown
                   label="Currency"
                   options={currencies}
@@ -706,44 +692,59 @@ export default function Register() {
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-5">
-                      <Input
+                      <Dropdown
                         label={"Age to retire"}
+                        options={ages}
                         value={values.partner?.age_retire}
-                        id="age_retire"
                         onchange={(e) => {
-                          setFieldValue("partner.age_retire", e.target.value);
+                          let val = e.target.value;
+                          let dummyfind = ages?.find((v) => v.value === val);
+                          setValues({
+                            ...values,
+                            partner: {
+                              ...values.partner,
+                              age_retire: {
+                                label: dummyfind.label,
+                                value: dummyfind.value,
+                              },
+                            },
+                          });
                         }}
-                        keytype={"number"}
-                        min={1}
                         error={
-                          touched.partner?.age_retire &&
-                          values?.partner?.age_retire?.length === 0
+                          touched.partner?.age_retire?.value &&
+                          values?.partner?.age_retire?.value?.length === 0
                             ? true
                             : false
                         }
                         errorText={"Age Retire is Required"}
-                        require
                       />
-                      <Input
+                      <Dropdown
                         label={"Life expectancy"}
+                        options={lifeExpectancies}
                         value={values.partner?.life_expectancy}
-                        id="life_expectancy"
                         onchange={(e) => {
-                          setFieldValue(
-                            "partner.life_expectancy",
-                            e.target.value
+                          let val = e.target.value;
+                          let dummyfind = lifeExpectancies?.find(
+                            (v) => v.value === val
                           );
+                          setValues({
+                            ...values,
+                            partner: {
+                              ...values.partner,
+                              life_expectancy: {
+                                label: dummyfind.label,
+                                value: dummyfind.value,
+                              },
+                            },
+                          });
                         }}
-                        keytype={"number"}
-                        min={1}
                         error={
-                          touched.partner?.life_expectancy &&
-                          values?.partner?.life_expectancy?.length === 0
+                          touched.partner?.life_expectancy?.value &&
+                          values?.partner?.life_expectancy?.value?.length === 0
                             ? true
                             : false
                         }
                         errorText={"Life expectancy is Required"}
-                        require
                       />
                     </div>
                   </>
