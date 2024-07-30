@@ -162,9 +162,7 @@ const ResetPassword = (props) => {
       </div>
       <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
         <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s.
+         {" Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever  since the 1500s."}
         </div>
       </div>
       <ToastContainer />

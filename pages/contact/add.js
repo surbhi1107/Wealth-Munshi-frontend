@@ -1,12 +1,12 @@
-import Layout from "@/components/Layout";
-import Loading from "@/components/Loading";
+import Layout from "../components/Layout";
+import Loading from "../components/Loading";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import Input from "@/components/Input";
+import Input from "../components/Input";
 import Select from "react-select";
-import RadioInput from "@/components/RadioInput";
+import RadioInput from "../components/RadioInput";
 
 let months = [
   { label: "January", value: 1 },

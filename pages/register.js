@@ -775,16 +775,14 @@ export default function Register() {
           </div>
           <div className="w-full mt-8 mb-5 md:mb-0">
             <p className="text-center md:text-left text-xs text-[#8A8A8A]">
-              © 2024 Welathmunshi. All Rights Reserved
+             {" © 2024 Welathmunshi. All Rights Reserved"}
             </p>
           </div>
         </div>
       </div>
       <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
         <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]" style={{ backgroundColor: '#B7E9F640', backdropFilter: 'contrast(75%)',     border: "1px solid" }}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s.
+         {" Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."}
         </div>
       </div>
       <ToastContainer />
