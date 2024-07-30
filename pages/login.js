@@ -172,9 +172,15 @@ const Login = () => {
         </div>
       </div>
       <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
-        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]" style={{ backgroundColor: '#B7E9F640', backdropFilter: 'contrast(75%)',     border: "1px solid" }}>
-        Start your journey by one click, explore
-        your wealth!
+        <div
+          className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]"
+          style={{
+            backgroundColor: "#B7E9F640",
+            backdropFilter: "contrast(75%)",
+            border: "1px solid",
+          }}
+        >
+          Start your journey by one click, explore your wealth!
         </div>
       </div>
       <ToastContainer />

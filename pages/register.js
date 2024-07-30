@@ -162,8 +162,8 @@ export default function Register() {
         value: Yup.string().required("Required"),
         label: Yup.string(),
       }),
-      age_retire: Yup.string().required("Age to retire is required"),
-      life_expectancy: Yup.string().required("Life expectancy is required"),
+      age_retire: Yup.string(),
+      life_expectancy: Yup.string(),
       country_code: Yup.string(),
       trust_name: Yup.string(),
       partner: Yup.object({
@@ -302,7 +302,7 @@ export default function Register() {
                 </p>
               </div>
               <div className="grid gap-3">
-                <div className="grid grid-cols-2 gap-5 mt-5">
+                <div className="grid md:grid-cols-2 gap-5 mt-5">
                   <Input
                     label={"First Name"}
                     value={values.fname}
@@ -320,7 +320,7 @@ export default function Register() {
                     errorText={errors.lname}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid md:grid-cols-2 gap-5">
                   <Input
                     label={"Email Address"}
                     value={values.email}
@@ -360,7 +360,7 @@ export default function Register() {
                   />
                 </div>
                 {values?.client_type?.value === 2 ? (
-                  <div className="grid grid-cols-2 gap-5">
+                  <div className="grid md:grid-cols-2 gap-5">
                     <Input
                       label={"Trust/Company name"}
                       value={values.trust_name}
@@ -377,12 +377,12 @@ export default function Register() {
                 ) : (
                   <></>
                 )}
-                <div className="">
+                <div className="w-full">
                   <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
                     Phone Number
                   </label>
-                  <div className="w-full grid grid-cols-4 gap-5">
-                    <div className="col-span-2 w-full grid grid-cols-2 gap-x-5">
+                  <div className="w-full grid md:grid-cols-4 gap-y-2 md:gap-y-0 md:gap-5">
+                    <div className="w-full md:col-span-2 grid md:grid-cols-2 gap-y-2 md:gap-y-0 md:gap-x-5">
                       <Dropdown
                         options={phoneTypes}
                         value={values.phone_type}
@@ -580,9 +580,9 @@ export default function Register() {
                           }}
                         />
                       </div>
-                      {touched.dob && errors.dob ? (
+                      {touched.dob && values?.dob?.length === 0 ? (
                         <span className="w-full text-sm mt-2 text-[#ff0000]">
-                          {errors.dob}
+                          Date of birth is required
                         </span>
                       ) : (
                         <></>
@@ -599,9 +599,11 @@ export default function Register() {
                       keytype={"number"}
                       min={1}
                       error={
-                        touched.age_retire && errors.age_retire ? true : false
+                        touched.age_retire && values.age_retire?.length === 0
+                          ? true
+                          : false
                       }
-                      errorText={errors.age_retire}
+                      errorText={"Age retire is Required"}
                     />
                     <Input
                       label={"Life expectancy"}
@@ -611,11 +613,12 @@ export default function Register() {
                       keytype={"number"}
                       min={1}
                       error={
-                        touched.life_expectancy && errors.life_expectancy
+                        touched.life_expectancy &&
+                        values.life_expectancy?.length === 0
                           ? true
                           : false
                       }
-                      errorText={errors.life_expectancy}
+                      errorText={"Life expectancy is Required"}
                     />
                   </div>
                 ) : (
@@ -775,14 +778,23 @@ export default function Register() {
           </div>
           <div className="w-full mt-8 mb-5 md:mb-0">
             <p className="text-center md:text-left text-xs text-[#8A8A8A]">
-             {" © 2024 Welathmunshi. All Rights Reserved"}
+              {" © 2024 Welathmunshi. All Rights Reserved"}
             </p>
           </div>
         </div>
       </div>
       <div className="flex-1 lg:min-h-[650px] bg-[#57BA52] rounded-[20px] p-[20px]">
-        <div className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]" style={{ backgroundColor: '#B7E9F640', backdropFilter: 'contrast(75%)',     border: "1px solid" }}>
-         {" Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."}
+        <div
+          className="h-full backdrop-filter backdrop-contrast-75 rounded-[20px] text-[22px] md:text-[28px] font-bold text-white p-[20px]"
+          style={{
+            backgroundColor: "#B7E9F640",
+            backdropFilter: "contrast(75%)",
+            border: "1px solid",
+          }}
+        >
+          {
+            " Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s."
+          }
         </div>
       </div>
       <ToastContainer />

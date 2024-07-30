@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 export default async function middleware(req, res) {
   const token = req?.cookies?._parsed?.get("access-token")?.value;
+  const user = req?.cookies?._parsed?.get("user")?.value;
   const path = req.nextUrl.pathname;
   const isPublicPath =
     path === "/login" || path === "/register" || path?.includes("password");
