@@ -27,7 +27,6 @@ const Update = (props) => {
   const [selectedDay, setSelectedDay] = useState();
   const [lifeExpectancies, setLifeExpectancies] = useState([]);
   const [ages, setAges] = useState([]);
-  const [error, setError] = useState("");
   let ignore = false;
 
   const {

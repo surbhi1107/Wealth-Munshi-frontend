@@ -169,8 +169,8 @@ export default function Register() {
         let res1 = await res.json();
         if (res1.success) {
           successToast(res1?.msg);
-          router.push("/login");
           // setLoading(false);
+          router.push("/login");
         } else {
           setLoading(false);
           setError(res1.error);
