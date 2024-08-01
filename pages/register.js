@@ -627,28 +627,31 @@ export default function Register() {
                 ) : (
                   <></>
                 )}
-                <Dropdown
-                  label="Currency"
-                  options={currencies}
-                  value={values.currency}
-                  onchange={(e) => {
-                    let val = e.target.value;
-                    let dummyfind = currencies?.find((v) => v.value === val);
-                    setValues({
-                      ...values,
-                      currency: {
-                        label: dummyfind.label,
-                        value: dummyfind.value,
-                      },
-                    });
-                  }}
-                  error={
-                    touched.currency?.value && errors.currency?.value
-                      ? true
-                      : false
-                  }
-                  errorText={errors.currency?.value}
-                />
+                <div className="grid grid-cols-2 gap-5">
+                  <Dropdown
+                    label="Currency"
+                    options={currencies}
+                    value={values.currency}
+                    onchange={(e) => {
+                      let val = e.target.value;
+                      let dummyfind = currencies?.find((v) => v.value === val);
+                      setValues({
+                        ...values,
+                        currency: {
+                          label: dummyfind.label,
+                          value: dummyfind.value,
+                        },
+                      });
+                    }}
+                    error={
+                      touched.currency?.value && errors.currency?.value
+                        ? true
+                        : false
+                    }
+                    errorText={errors.currency?.value}
+                  />
+                  <div></div>
+                </div>
                 {values?.client_type.value === 1 ? (
                   <>
                     <div className="text-[#49475A] font-bold mt-1">

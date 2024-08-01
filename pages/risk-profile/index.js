@@ -11,14 +11,22 @@ let riskData = [
   {
     risk_profile: "Defensive",
     rate_of_return: 4.0,
-    profile: "Balanced",
-    retire_age: 65,
   },
   {
     risk_profile: "Conservative",
     rate_of_return: 6.0,
-    profile: "Growth",
-    retire_age: 78,
+  },
+  {
+    risk_profile: "Balanced",
+    rate_of_return: 8.0,
+  },
+  {
+    risk_profile: "Growth",
+    rate_of_return: 10.0,
+  },
+  {
+    risk_profile: "Aggressive",
+    rate_of_return: 14.0,
   },
 ];
 
@@ -104,12 +112,6 @@ export default function RiskProfile() {
                   <th className="py-2 px-3 text-[#57BA52] text-sm font-bold whitespace-nowrap">
                     Rate of Return{" "}
                   </th>
-                  <th className="py-2 px-3 text-[#57BA52] text-sm font-bold whitespace-nowrap">
-                    Risk Profile
-                  </th>
-                  <th className="py-2 px-3 text-[#57BA52] text-sm font-bold whitespace-nowrap">
-                    Retirement age
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -140,13 +142,7 @@ export default function RiskProfile() {
                         {v.risk_profile}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {v.rate_of_return}
-                      </td>
-                      <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {v?.profile}
-                      </td>
-                      <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {v?.retire_age}
+                        {`${v.rate_of_return.toFixed(1)} %`}
                       </td>
                     </tr>
                   ))

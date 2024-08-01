@@ -639,6 +639,8 @@ export default function Home(props) {
     } else {
       setLoading(false);
       setPartnerData([]);
+      setMemberData([]);
+      setContactData([]);
     }
   };
 
@@ -658,7 +660,6 @@ export default function Home(props) {
         getData();
       } else {
         setLoading(false);
-        setPartnerData([]);
       }
     } catch (error) {
       console.error(error);
@@ -685,7 +686,6 @@ export default function Home(props) {
         getData();
       } else {
         setLoading(false);
-        setPartnerData([]);
       }
     } catch (error) {
       console.error(error);
@@ -712,7 +712,6 @@ export default function Home(props) {
         getData();
       } else {
         setLoading(false);
-        setPartnerData([]);
       }
     } catch (error) {
       console.error(error);
@@ -1492,10 +1491,10 @@ export default function Home(props) {
                 }}
                 key={i}
                 as={`/family-member/add`}
-                className="w-full border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
+                className="w-full bg-white hover:bg-[#F5FAF5] border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}
-                <p className="text-xs md:text-sm font-medium text-[#45486A] pt-1">
+                <p className="text-xs md:text-sm font-medium text-[#45486A] pt-1 text-center">
                   {v.name}
                 </p>
               </Link>
@@ -1517,10 +1516,10 @@ export default function Home(props) {
                 }}
                 key={i}
                 as={`/contact/add`}
-                className="w-full border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
+                className="w-full bg-white hover:bg-[#F5FAF5] border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}
-                <p className="text-xs md:text-sm font-medium text-[#45486A] pt-1">
+                <p className="text-xs md:text-sm font-medium text-[#45486A] pt-1 text-center">
                   {v.name}
                 </p>
               </Link>
