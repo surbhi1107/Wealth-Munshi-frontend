@@ -236,7 +236,10 @@ export default function RiskProfile() {
                             <button
                               className="border rounded-[5px] border-[#57BA52] px-2 py-1 text-[#57BA52]"
                               onClick={() => {
-                                console.log("make pdf");
+                                router.push({
+                                  pathname: "/risk-profile/questions-result",
+                                  query: { partnerId: v?._id },
+                                });
                               }}
                             >
                               Report

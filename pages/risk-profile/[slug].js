@@ -4,9 +4,12 @@ import { ToastContainer } from "react-toastify";
 import * as cookie from "cookie";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import Loading from "@/components/Loading";
+import { usePathname } from "next/navigation";
 
 const Questions = (props) => {
   let partnerId = props?.partnerId;
+  let slug = props?.slug;
+  let pathname = usePathname();
   const [questionnaire, setQuestionnaire] = useState({});
   const [loading, setLoading] = useState(false);
   let ignore = false;
@@ -15,7 +18,9 @@ const Questions = (props) => {
   const [queWithAns, setQueWithAns] = useState([]);
   const [quesData, setQuesData] = useState({});
   const [isTouched, setIsTouched] = useState(false);
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState(
+    slug?.includes("result") ? 1 : 0
+  );
 
   const groupBy = (arr, key) => {
     return arr.reduce((result, currentValue) => {
@@ -93,7 +98,10 @@ const Questions = (props) => {
 
   useEffect(() => {
     if (!ignore) {
-      getData();
+      if (pathname?.includes("question")) getData();
+      if (slug?.includes("result")) {
+        setCurrentTab(1);
+      }
     }
     return () => {
       ignore = true;
