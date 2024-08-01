@@ -19,6 +19,7 @@ export default function Register() {
   let currencies = jsonData.currencies ?? [];
   let phoneTypes = jsonData.phoneTypes ?? [];
   let months = jsonData.months ?? [];
+  let countryCode = jsonData.countryCode ?? [];
   const [lifeExpectancies, setLifeExpectancies] = useState([]);
   const [ages, setAges] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ export default function Register() {
       email: "",
       dob: "",
       currency: {
-        label: "Indian Rupees",
+        label: "INR",
         value: "INR",
       },
       phone_type: {
@@ -66,7 +67,11 @@ export default function Register() {
         label: "85",
         value: 85,
       },
-      country_code: "",
+      country_code: {
+        name: "India",
+        label: "+91",
+        value: "IN",
+      },
       partner: {
         fname: "",
         lname: "",
@@ -107,7 +112,11 @@ export default function Register() {
         value: Yup.string().required("Required"),
         label: Yup.string(),
       }),
-      country_code: Yup.string(),
+      country_code: Yup.object({
+        name: Yup.string(),
+        value: Yup.string().required("Required"),
+        label: Yup.string(),
+      }),
       trust_name: Yup.string(),
       partner: Yup.object({
         fname: Yup.string(),
@@ -131,7 +140,7 @@ export default function Register() {
           fname: values.fname,
           lname: values.lname,
           phone_type: values.phone_type.value,
-          country_code: values.country_code,
+          country_code: values.country_code?.value,
           phone_number: values.phone_number,
           client_type: values.client_type.value,
           email: values.email,
@@ -371,17 +380,24 @@ export default function Register() {
                           });
                         }}
                       />
-                      <Input
-                        value={values.country_code}
-                        id="country_code"
-                        onChange={(e) => {
-                          let val = e.target.value;
-                          let maxLength = 10;
-                          if (val.length <= maxLength) {
-                            setFieldValue("country_code", val);
-                          }
-                        }}
+                      <Dropdown
                         placeholder="Country Code"
+                        options={countryCode}
+                        value={values.country_code}
+                        onchange={(e) => {
+                          let val = e.target.value;
+                          let dummyfind = countryCode?.find(
+                            (v) => v.value === val
+                          );
+                          setValues({
+                            ...values,
+                            country_code: {
+                              label: dummyfind.label,
+                              value: dummyfind.value,
+                              name: dummyfind.name,
+                            },
+                          });
+                        }}
                       />
                     </div>
                     <div className="col-span-2">
