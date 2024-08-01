@@ -1,14 +1,12 @@
-import Layout from "@/components/Layout";
 import React, { Fragment, useEffect, useState } from "react";
+import Layout from "@/components/Layout";
 import { ToastContainer } from "react-toastify";
 import * as cookie from "cookie";
-import { useRouter } from "next/router";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import Loading from "@/components/Loading";
 
-const questions = (props) => {
+const Questions = (props) => {
   let partnerId = props?.partnerId;
-  const router = useRouter();
   const [questionnaire, setQuestionnaire] = useState({});
   const [loading, setLoading] = useState(false);
   let ignore = false;
@@ -650,7 +648,7 @@ const questions = (props) => {
   );
 };
 
-export default questions;
+export default Questions;
 
 export const getServerSideProps = async (ctx) => {
   let newcookies = ctx.req.headers.cookie;
