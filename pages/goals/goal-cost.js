@@ -79,7 +79,7 @@ export default function GoalsCost() {
                 <li>
                   The goal summary sets out the cost of your goals. The Total
                   Amount Required is the amount that will need to be spent to
-                  provide the goal. Don't be put off by the large numbers -
+                  provide the goal. Don&apos;t be put off by the large numbers -
                   remember that these include allowance for inflation. Of more
                   interest are the amounts that would have to be invested now to
                   achieve the goal at its time or the amount needed to be
