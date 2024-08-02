@@ -5,27 +5,149 @@ import { use, useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Input from "@/components/Input";
-import Select from "react-select";
-import RadioInput from "@/components/RadioInput";
 import * as cookie from "cookie";
 import Dropdown from "@/components/Dropdown";
 import { toast, ToastContainer } from "react-toastify";
 import moment from "moment";
 import jsonData from "../../data.json";
+import { Checkbox } from "@headlessui/react";
+
+export const getAge = (dob, end_age) => {
+  // Convert the DOB string to a Date object
+  const birthDate = new Date(dob);
+  // Get today's date
+  const today = new Date();
+  // Calculate the age
+  let age = today.getFullYear() - birthDate.getFullYear();
+  // Adjust if the birthday hasn't occurred yet this year
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  // get left age
+  let years = end_age - age;
+  // Add years to today date
+  let newage = new Date().setFullYear(new Date().getFullYear() + years);
+  return new Date(newage)?.toISOString();
+};
 
 export default function Add(props) {
   const router = useRouter();
   let user = props.user;
-  let months = jsonData.months ?? [];
-  let genders = jsonData.genders ?? [];
+  let retireagelist = jsonData?.retire_ages ?? [];
+  let lifeExpectancylist = jsonData?.life_expectation ?? [];
+  let lifeOccurences = jsonData?.occurences ?? [];
+  let goalOftenLists = jsonData?.goalOften ?? [];
+  const [startTime, setStartTime] = useState([
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "year",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "age",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "age_retire",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "life_exp",
+      desc: "",
+    },
+  ]);
+  const [endTime, setEndTime] = useState([
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "year",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "age",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "age_retire",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "life_exp",
+      desc: "",
+    },
+    {
+      date: "",
+      member: {
+        _id: "",
+        name: "",
+        dob: "",
+      },
+      value: "",
+      type: "occurence",
+      desc: "",
+    },
+  ]);
   const [loading, setLoading] = useState(false);
   const [years, setYears] = useState([]);
-  const [days, setDays] = useState([]);
-  const [selectedYear, setSelectedYear] = useState();
-  const [selectedMonth, setSelectedMonth] = useState();
-  const [selectedDay, setSelectedDay] = useState();
-  const [lifeExpectancies, setLifeExpectancies] = useState([]);
   const [ages, setAges] = useState([]);
+  const [members, setMembers] = useState([]);
   const [error, setError] = useState("");
   let ignore = false;
 
@@ -39,57 +161,103 @@ export default function Add(props) {
     handleSubmit,
   } = useFormik({
     initialValues: {
-      type: "",
-      fname: "",
-      mname: "",
-      lname: "",
-      dob: "",
-      age_retire: {
-        label: "65",
-        value: 65,
+      type: props.state.value,
+      name: "",
+      amount: 0,
+      inflation: "",
+      is_longterm_goal: false,
+      goal_often: "1",
+      start_timeline: {
+        type: "year",
+        value: "",
+        date: "",
+        member: {
+          _id: "",
+          name: "",
+          dob: "",
+          life_expectancy: "",
+          age_retire: "",
+        },
+        desc: "",
       },
-      life_expectancy: {
-        label: "85",
-        value: 85,
-      },
-      gender: {
-        name: "Male",
-        value: 1,
+      end_timeline: {
+        type: "year",
+        value: "",
+        date: "",
+        member: {
+          _id: "",
+          name: "",
+          dob: "",
+          life_expectancy: "",
+          age_retire: "",
+        },
+        desc: "",
       },
     },
     validationSchema: Yup.object({
       type: Yup.string(),
-      fname: Yup.string().required("First Name is required"),
-      mname: Yup.string(),
-      lname: Yup.string().required("Last Name is required"),
-      dob: Yup.string().required("Dob is required"),
-      gender: Yup.object({
-        value: Yup.string(),
-        name: Yup.string(),
+      name: Yup.string(),
+      amount: Yup.number()
+        .positive("Enter positive amount")
+        .required("Amount is required"),
+      inflation: Yup.string().required("Inflation is required"),
+      is_longterm_goal: Yup.bool(),
+      goal_often: Yup.string(),
+      start_timeline: Yup.object({
+        date: Yup.string(),
+        type: Yup.string(),
+        desc: Yup.string(),
+        member: Yup.object({
+          _id: Yup.string(),
+          name: Yup.string(),
+          age_retire: Yup.number(),
+          life_expectancy: Yup.number(),
+          dob: Yup.string(),
+        }),
       }),
-      age_retire: Yup.object({
-        value: Yup.string().required("Required"),
-        label: Yup.string(),
-      }),
-      life_expectancy: Yup.object({
-        value: Yup.string().required("Required"),
-        label: Yup.string(),
+      end_timeline: Yup.object({
+        date: Yup.string(),
+        type: Yup.string(),
+        desc: Yup.string(),
+        member: Yup.object({
+          _id: Yup.string(),
+          name: Yup.string(),
+          age_retire: Yup.number(),
+          life_expectancy: Yup.number(),
+          dob: Yup.string(),
+        }),
       }),
     }),
     onSubmit: async (values) => {
       try {
         setLoading(true);
+        let dummystartfind = startTime.find(
+          (v) => v.type === values.start_timeline.type
+        );
+        let dummyendfind = endTime.find(
+          (v) => v.type === values.end_timeline.type
+        );
         let data = {
-          type: props?.state?.value,
-          fname: values.fname,
-          mname: values.mname,
-          lname: values.lname,
-          dob: values.dob,
-          age_retire: values.age_retire?.value,
-          life_expectancy: values.life_expectancy?.value,
-          gender: values.gender.value,
+          type: values.type,
+          name: values.name,
+          amount: values.amount,
+          inflation: values.inflation,
+          is_longterm_goal: values.is_longterm_goal,
+          start_timeline: {
+            ...dummystartfind,
+            member: dummystartfind.member?._id,
+          },
+          ...(values.is_longterm_goal
+            ? {
+                end_timeline: {
+                  ...dummyendfind,
+                  member: dummyendfind.member?._id,
+                },
+                goal_often: values.goal_often,
+              }
+            : {}),
         };
-        const res = await fetch(`/api/family-member/add`, {
+        const res = await fetch(`/api/goals/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -98,7 +266,7 @@ export default function Add(props) {
         });
         let res1 = await res.json();
         if (res1.success) {
-          router.push("/");
+          router.push("/goals");
           setLoading(false);
         } else {
           setLoading(false);
@@ -114,6 +282,112 @@ export default function Add(props) {
     },
   });
 
+  const getmembers = async () => {
+    setLoading(true);
+    let response = await fetch(`/api/family-member/all-members`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    let res1 = await response.json();
+    if (res1?.success) {
+      setLoading(false);
+      let dummymembers = res1?.data?.map((v) => {
+        return {
+          label: v?.fname,
+          value: v?._id,
+          dob: v?.dob,
+          age_retire: v?.age_retire,
+          life_expectancy: v?.life_expectancy,
+        };
+      });
+      setMembers(dummymembers);
+      let findmain = res1?.data?.find((v) => v.type === "self");
+      let dummystart = [...startTime];
+      let newary = [];
+      let yearDate = new Date().getFullYear();
+      let age = 50;
+      let age_retire = findmain?.age_retire;
+      let life_expectancy = findmain?.life_expectancy;
+      dummystart.map((v) => {
+        let newdate =
+          v?.type === "year"
+            ? moment(new Date()).startOf("y").format()
+            : getAge(
+                findmain?.dob,
+                v?.type === "age"
+                  ? age
+                  : v?.type === "age_retire"
+                  ? age_retire
+                  : life_expectancy
+              );
+        let obj = {
+          member: {
+            _id: findmain?._id,
+            name: findmain?.fname,
+            dob: findmain?.dob,
+            age_retire: findmain?.age_retire,
+            life_expectancy: findmain?.life_expectancy,
+          },
+          type: v.type,
+          value:
+            v?.type === "year"
+              ? yearDate
+              : v?.type === "age"
+              ? age
+              : v?.type === "age_retire"
+              ? 0
+              : 0,
+          date: newdate,
+          desc:
+            v?.type === "year"
+              ? `In ${yearDate}`
+              : v?.type === "age"
+              ? `When ${findmain?.fname} is ${age} (${moment(newdate).get(
+                  "year"
+                )})`
+              : v?.type === "age_retire"
+              ? `When ${findmain?.fname} retires ${age_retire} (${moment(
+                  newdate
+                ).get("year")})`
+              : `When ${findmain?.fname} retires ${life_expectancy} (${moment(
+                  newdate
+                ).get("year")})`,
+        };
+        newary.push(obj);
+      });
+      let dummyoccurence = {
+        member: {
+          _id: findmain?._id,
+          name: findmain?.fname,
+          dob: findmain?.dob,
+          age_retire: findmain?.age_retire,
+          life_expectancy: findmain?.life_expectancy,
+        },
+        type: "occurence",
+        value: 2,
+        date: getAge(new Date().toISOString(), 2),
+        desc: `After 2 occurences`,
+      };
+      let defaultstart = newary.find((v) => v.type === "year");
+      setValues({
+        ...values,
+        start_timeline: {
+          ...defaultstart,
+        },
+        end_timeline: {
+          ...defaultstart,
+        },
+      });
+      setStartTime(newary);
+      setEndTime([...newary, dummyoccurence]);
+    } else {
+      setLoading(false);
+      setMembers([]);
+    }
+  };
+
   const errorToast = (msg) => {
     toast.error(msg, {
       position: "top-right",
@@ -122,25 +396,17 @@ export default function Add(props) {
 
   const getYears = () => {
     let currentYear = new Date().getFullYear();
-    let currentMonth = new Date().getMonth();
     //get last 110 year of list
     let damiyears = [];
-    for (var i = currentYear; i >= currentYear - 110; i--) {
+    for (var i = currentYear; i <= currentYear + 80; i++) {
       damiyears.push({ label: i, value: i });
     }
     setYears(damiyears);
-    // get days of current month
-    let damiDays = [];
-    const numDays = (y, m) => new Date(y, m, 0).getDate();
-    let monthofDays = numDays(currentYear, currentMonth);
-    for (var i = 1; i <= monthofDays; i++) {
-      damiDays.push({ label: i, value: i });
-    }
-    setDays(damiDays);
   };
 
   useEffect(() => {
     if (!ignore) {
+      setLoading(true);
       getYears();
       let dummylifeexpectancy = [];
       let dummyage = [];
@@ -153,8 +419,8 @@ export default function Add(props) {
       for (let i = 1; i <= 100; i++) {
         dummyage = [...dummyage, { label: `${i}`, value: i }];
       }
-      setLifeExpectancies(dummylifeexpectancy);
       setAges(dummyage);
+      if (dummyage?.length > 0) getmembers();
     }
     return () => {
       ignore = true;
@@ -192,14 +458,14 @@ export default function Add(props) {
                 />
               </svg>
             </div>
-            <p className="text-[15px] font-semibold text-[#45486A]">
+            <p className="text-[15px] capitalize font-semibold text-[#45486A]">
               {props?.state?.name}
             </p>
           </div>
           <p className="text-base text-[#A1A1AA] !mt-3">
             Please confirm that your details are current and click Save.
           </p>
-          {/* <form
+          <form
             className="!mt-3"
             onSubmit={(e) => {
               e.preventDefault();
@@ -208,233 +474,1066 @@ export default function Add(props) {
           >
             <div className="md:grid md:grid-cols-2 gap-x-8 gap-y-3">
               <Input
-                label={"First Name"}
-                value={values.fname}
-                id="fname"
+                label={"Name"}
+                value={values.name}
+                id="name"
                 onchange={handleChange}
-                error={touched.fname && errors.fname ? true : false}
-                errorText={errors.fname}
-                require
+                error={touched.name && errors.name ? true : false}
+                errorText={errors.name}
               />
               <Input
-                label={"Middle Name"}
-                value={values.mname}
-                id="mname"
+                label={"Amount"}
+                value={values.amount}
+                id="amount"
+                keytype="number"
+                min={1}
                 onchange={handleChange}
-                error={touched.mname && errors.mname ? true : false}
-                errorText={errors.mname}
-              />
-              <Input
-                label={"Last Name"}
-                value={values.lname}
-                id="lname"
-                onchange={handleChange}
-                error={touched.lname && errors.lname ? true : false}
-                errorText={errors.lname}
+                error={touched.amount && errors.amount ? true : false}
+                errorText={errors.amount}
                 require
                 requireClass="text-[#54577A]"
               />
-              <div className="">
-                <label className="w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] mb-2">
-                  Date of Birth <span className={`text-red-600`}>*</span>
+              <Input
+                label={"Inflation %"}
+                value={values.inflation}
+                id="inflation"
+                onchange={handleChange}
+                error={touched.inflation && errors.inflation ? true : false}
+                errorText={errors.inflation}
+                require
+                requireClass="text-[#54577A]"
+              />
+              <div></div>
+              <div className="col-span-2">
+                <h3 className="text-[20px] font-semibold text-[#45486A] mb-2">
+                  Goal timeline
+                </h3>
+                <label
+                  className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA]`}
+                >
+                  When does this goal happen?{" "}
+                  <span className={`text-red-600`}>*</span>
                 </label>
-                <div className="w-full lg:w-[75%] grid grid-cols-3 gap-5">
-                  <Dropdown
-                    options={days}
-                    placeholder="Day:"
-                    value={selectedDay}
-                    onchange={(e) => {
-                      if (e.target.value === "") {
-                        setSelectedDay({});
-                        setFieldValue("dob", "");
-                      } else {
-                        let val =
-                          e.target.value?.length > 0
-                            ? parseInt(e.target.value)
-                            : "";
-                        let dummyfind = days?.find((v) => v.value === val);
-                        setSelectedDay({
-                          ...dummyfind,
-                        });
-                        if (selectedMonth?.value && selectedYear?.value) {
-                          let day = val;
-                          let month = selectedMonth.value;
-                          let year = selectedYear.value;
-                          let date = `${month}-${day}-${year}`;
-                          setFieldValue(
-                            "dob",
-                            moment(date).startOf("D").format()
+                <div className="w-full mt-3 space-y-2">
+                  {/* year */}
+                  <div className="flex gap-2 items-center">
+                    <span className="relative flex items-center rounded-full cursor-pointer">
+                      <input
+                        id={"year"}
+                        checked={
+                          values.start_timeline?.type === "year" ? true : false
+                        }
+                        onChange={() => {
+                          let findtype = startTime.find(
+                            (v) => v.type === "year"
                           );
-                        }
-                      }
-                    }}
-                  />
-                  <Dropdown
-                    options={months}
-                    placeholder="Month:"
-                    value={selectedMonth}
-                    onchange={(e) => {
-                      if (e.target.value === "") {
-                        setSelectedMonth({});
-                        setFieldValue("dob", "");
-                      } else {
-                        let val =
-                          e.target.value?.length > 0
-                            ? parseInt(e.target.value)
-                            : "";
-                        let dummyfind = months?.find((v) => v.value === val);
-                        setSelectedMonth({
-                          ...dummyfind,
-                        });
-                        // get list of days in selected month
-                        let year =
-                          selectedYear?.value ?? new Date().getFullYear();
-                        let month = val;
-                        const numDays = (y, m) => new Date(y, m, 0).getDate();
-                        let monthofDays = numDays(year, month);
-                        let damimonthDays = [];
-                        for (var i = 1; i <= monthofDays; i++) {
-                          damimonthDays.push({ label: i, value: i });
-                        }
-                        setDays(damimonthDays);
-                        if (
-                          selectedDay?.value &&
-                          selectedDay.value > monthofDays
-                        )
-                          setSelectedDay({
-                            label: monthofDays,
-                            value: monthofDays,
+                          setFieldValue("start_timeline", findtype);
+                        }}
+                        name="start_timeline"
+                        type="radio"
+                        className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                      />
+                      <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-2.5 w-2.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <circle
+                            data-name="ellipse"
+                            cx="8"
+                            cy="8"
+                            r="8"
+                          ></circle>
+                        </svg>
+                      </span>
+                    </span>
+                    <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                      <p>In the year</p>
+                      <Dropdown
+                        options={years}
+                        value={{
+                          label: startTime?.find((v) => v?.type === "year")
+                            ?.value,
+                          value: startTime?.find((v) => v?.type === "year")
+                            ?.value,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = parseInt(e.target.value);
+                          let dummyyear = years?.find((v) => v.value === val);
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            if (v?.type === "year") {
+                              return {
+                                ...v,
+                                date: moment(new Date())
+                                  .set("year", dummyyear?.value)
+                                  .startOf("y")
+                                  .format(),
+                                desc: `In ${dummyyear?.value}`,
+                                value: dummyyear?.value,
+                              };
+                            }
+                            return { ...v };
                           });
-                        if (selectedDay?.value && selectedYear?.value) {
-                          let day = selectedDay.value;
-                          let date = `${month}-${day}-${year}`;
-                          setFieldValue(
-                            "dob",
-                            moment(date).startOf("D").format()
+                          setStartTime(dummystart);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {/* age */}
+                  <div className="flex gap-2 items-center">
+                    <span className="relative flex items-center rounded-full cursor-pointer">
+                      <input
+                        id={"age"}
+                        checked={
+                          values.start_timeline?.type === "age" ? true : false
+                        }
+                        onChange={() => {
+                          let findtype = startTime.find(
+                            (v) => v.type === "age"
                           );
-                        }
-                      }
-                    }}
-                  />
-                  <Dropdown
-                    options={years}
-                    placeholder="Year:"
-                    value={selectedYear}
-                    onchange={(e) => {
-                      if (e.target.value === "") {
-                        setSelectedYear({});
-                        setFieldValue("dob", "");
-                      } else {
-                        let val =
-                          e.target.value?.length > 0
-                            ? parseInt(e.target.value)
-                            : "";
-                        let dummyfind = years?.find((v) => v.value === val);
-                        setSelectedYear({
-                          ...dummyfind,
-                        });
-                        // get list of days in selected month
-                        let year = val;
-                        let month =
-                          selectedMonth?.value ?? new Date().getMonth();
-                        const numDays = (y, m) => new Date(y, m, 0).getDate();
-                        let monthofDays = numDays(year, month);
-                        let damimonthDays = [];
-                        for (var i = 1; i <= monthofDays; i++) {
-                          damimonthDays.push({ label: i, value: i });
-                        }
-                        setDays(damimonthDays);
-                        if (
-                          selectedDay?.value &&
-                          selectedDay.value > monthofDays
-                        )
-                          setSelectedDay({
-                            label: monthofDays,
-                            value: monthofDays,
+                          setFieldValue("start_timeline", findtype);
+                        }}
+                        name="start_timeline"
+                        type="radio"
+                        className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                      />
+                      <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-2.5 w-2.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <circle
+                            data-name="ellipse"
+                            cx="8"
+                            cy="8"
+                            r="8"
+                          ></circle>
+                        </svg>
+                      </span>
+                    </span>
+                    <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                      <p>When</p>
+                      <Dropdown
+                        options={members}
+                        value={{
+                          label: startTime?.find((v) => v?.type === "age")
+                            ?.member?.name,
+                          value: startTime?.find((v) => v?.type === "age")
+                            ?.member?._id,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = e.target.value;
+                          let dummymember = members?.find(
+                            (v) => v.value === val
+                          );
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            if (v?.type === "age") {
+                              let date = getAge(dummymember?.dob, v.value);
+                              return {
+                                ...v,
+                                date: date,
+                                member: {
+                                  _id: dummymember?.value,
+                                  name: dummymember?.label,
+                                  dob: dummymember?.dob,
+                                  age_retire: dummymember?.age_retire,
+                                  life_expectancy: dummymember?.life_expectancy,
+                                },
+                                desc: `When ${dummymember?.label} is ${
+                                  v.value
+                                } (${moment(date)?.get("year")})`,
+                              };
+                            }
+                            return { ...v };
                           });
-                        if (selectedMonth?.value && selectedDay?.value) {
-                          let day = selectedDay.value;
-                          let date = `${month}-${day}-${year}`;
-                          setFieldValue(
-                            "dob",
-                            moment(date).startOf("D").format()
-                          );
+                          setStartTime(dummystart);
+                        }}
+                      />
+                      <p>is</p>
+                      <Dropdown
+                        options={ages}
+                        value={{
+                          label: startTime?.find((v) => v?.type === "age")
+                            ?.value,
+                          value: startTime?.find((v) => v?.type === "age")
+                            ?.value,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = parseInt(e.target.value);
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            if (v?.type === "age") {
+                              let dob = getAge(v.member?.dob, val);
+                              return {
+                                ...v,
+                                date: dob,
+                                desc: `When ${
+                                  v?.member?.name
+                                } is ${val} (${moment(dob).get("year")})`,
+                                value: val,
+                              };
+                            }
+                            return { ...v };
+                          });
+                          setStartTime(dummystart);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {/* age retire */}
+                  <div className="flex gap-2 items-center">
+                    <span className="relative flex items-center rounded-full cursor-pointer">
+                      <input
+                        id={"age_retire"}
+                        checked={
+                          values.start_timeline?.type === "age_retire"
+                            ? true
+                            : false
                         }
-                      }
-                    }}
-                  />
+                        onChange={() => {
+                          let findtype = startTime.find(
+                            (v) => v.type === "age_retire"
+                          );
+                          setFieldValue("start_timeline", findtype);
+                        }}
+                        name="start_timeline"
+                        type="radio"
+                        className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                      />
+                      <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-2.5 w-2.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <circle
+                            data-name="ellipse"
+                            cx="8"
+                            cy="8"
+                            r="8"
+                          ></circle>
+                        </svg>
+                      </span>
+                    </span>
+                    <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                      <p>When</p>
+                      <Dropdown
+                        options={members}
+                        value={{
+                          label: startTime?.find(
+                            (v) => v?.type === "age_retire"
+                          )?.member?.name,
+                          value: startTime?.find(
+                            (v) => v?.type === "age_retire"
+                          )?.member?._id,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = e.target.value;
+                          let dummymember = members?.find(
+                            (v) => v.value === val
+                          );
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            let age = dummymember?.age_retire + v?.value;
+                            if (v?.type === "age_retire") {
+                              let findretire = retireagelist.find(
+                                (d) => d.value === v?.value
+                              );
+                              let newdate = getAge(dummymember?.dob, age);
+                              return {
+                                ...v,
+                                date: newdate,
+                                member: {
+                                  _id: dummymember?.value,
+                                  name: dummymember?.label,
+                                  dob: dummymember?.dob,
+                                  age_retire: dummymember?.age_retire,
+                                  life_expectancy: dummymember?.life_expectancy,
+                                },
+                                desc:
+                                  findretire?.value === 0
+                                    ? `when ${
+                                        dummymember?.label
+                                      } retires (${moment(newdate).get(
+                                        "year"
+                                      )})`
+                                    : `${findretire?.label} of ${
+                                        dummymember?.label
+                                      } (${moment(newdate).get("year")})`,
+                              };
+                            }
+                            return { ...v };
+                          });
+                          setStartTime(dummystart);
+                        }}
+                      />
+                      <p>reaches</p>
+                      <Dropdown
+                        options={retireagelist}
+                        value={{
+                          label: startTime?.find(
+                            (v) => v?.type === "age_retire"
+                          )?.value,
+                          value: startTime?.find(
+                            (v) => v?.type === "age_retire"
+                          )?.value,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = parseInt(e.target.value);
+                          let findretire = retireagelist.find(
+                            (v) => v.value === val
+                          );
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            let age = v?.member?.age_retire + val;
+                            if (v?.type === "age_retire") {
+                              let newdate = getAge(v.member?.dob, age);
+                              return {
+                                ...v,
+                                date: newdate,
+                                value: val,
+                                desc:
+                                  findretire?.value === 0
+                                    ? `When ${
+                                        v?.member?.name
+                                      } retires (${moment(newdate).get(
+                                        "year"
+                                      )})`
+                                    : `${findretire?.label} of ${
+                                        v?.member?.name
+                                      } (${moment(newdate).get("year")})`,
+                              };
+                            }
+                            return { ...v };
+                          });
+                          setStartTime(dummystart);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {/* life expectancy */}
+                  <div className="flex gap-2 items-center">
+                    <span className="relative flex items-center rounded-full cursor-pointer">
+                      <input
+                        id={"life_exp"}
+                        checked={
+                          values.start_timeline?.type === "life_exp"
+                            ? true
+                            : false
+                        }
+                        onChange={() => {
+                          let findtype = startTime.find(
+                            (v) => v.type === "life_exp"
+                          );
+                          setFieldValue("start_timeline", findtype);
+                        }}
+                        name="start_timeline"
+                        type="radio"
+                        className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                      />
+                      <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-2.5 w-2.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <circle
+                            data-name="ellipse"
+                            cx="8"
+                            cy="8"
+                            r="8"
+                          ></circle>
+                        </svg>
+                      </span>
+                    </span>
+                    <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                      <p>When</p>
+                      <Dropdown
+                        options={members}
+                        value={{
+                          label: startTime?.find((v) => v?.type === "life_exp")
+                            ?.member?.name,
+                          value: startTime?.find((v) => v?.type === "life_exp")
+                            ?.member?._id,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = e.target.value;
+                          let dummymember = members?.find(
+                            (v) => v.value === val
+                          );
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            let age = dummymember?.life_expectancy + v?.value;
+                            if (v?.type === "life_exp") {
+                              let findretire = lifeExpectancylist.find(
+                                (d) => d.value === v?.value
+                              );
+                              let newdate = getAge(dummymember?.dob, age);
+                              return {
+                                ...v,
+                                date: newdate,
+                                member: {
+                                  _id: dummymember?.value,
+                                  name: dummymember?.label,
+                                  dob: dummymember?.dob,
+                                  age_retire: dummymember?.age_retire,
+                                  life_expectancy: dummymember?.life_expectancy,
+                                },
+                                desc:
+                                  dummymember?.value === 0
+                                    ? `When ${
+                                        v?.member?.name
+                                      } retires (${moment(newdate).get(
+                                        "year"
+                                      )})`
+                                    : `${dummymember?.label} of ${
+                                        findretire?.label
+                                      } (${moment(newdate).get("year")})`,
+                              };
+                            }
+                            return { ...v };
+                          });
+                          setStartTime(dummystart);
+                        }}
+                      />
+                      <p>reaches</p>
+                      <Dropdown
+                        options={lifeExpectancylist}
+                        value={{
+                          label: startTime?.find((v) => v?.type === "life_exp")
+                            ?.value,
+                          value: startTime?.find((v) => v?.type === "life_exp")
+                            ?.value,
+                        }}
+                        mainClass="w-max"
+                        onchange={(e) => {
+                          let val = parseInt(e.target.value);
+                          let findretire = lifeExpectancylist.find(
+                            (v) => v.value === val
+                          );
+                          let dummystart = [...startTime];
+                          dummystart = dummystart.map((v) => {
+                            let age = v?.member?.life_expectancy + val;
+                            if (v?.type === "life_exp") {
+                              let newdate = getAge(v.member?.dob, age);
+                              return {
+                                ...v,
+                                date: newdate,
+                                desc:
+                                  findretire?.value === 0
+                                    ? `When ${
+                                        v?.member?.name
+                                      } expires (${moment(newdate).get(
+                                        "year"
+                                      )})`
+                                    : `${findretire?.label} of ${
+                                        v?.member?.name
+                                      } (${moment(newdate).get("year")})`,
+                                value: val,
+                              };
+                            }
+                            return { ...v };
+                          });
+                          setStartTime(dummystart);
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                {touched.dob && errors.dob ? (
-                  <span className="w-full text-sm mt-2 text-[#ff0000]">
-                    {errors.dob}
-                  </span>
-                ) : (
-                  <></>
-                )}
               </div>
-              <Dropdown
-                label={"Age to retire"}
-                options={ages}
-                value={values.age_retire}
-                onchange={(e) => {
-                  let val = parseInt(e.target.value);
-                  let dummyfind = ages?.find((v) => v.value === val);
-                  setValues({
-                    ...values,
-                    age_retire: {
-                      label: dummyfind.label,
-                      value: dummyfind.value,
-                    },
-                  });
-                }}
-                error={
-                  touched.age_retire?.value && errors?.age_retire?.value
-                    ? true
-                    : false
-                }
-                errorText={errors?.age_retire?.value}
-              />
-              <Dropdown
-                label={"Life expectancy"}
-                options={lifeExpectancies}
-                value={values.life_expectancy}
-                onchange={(e) => {
-                  let val = parseInt(e.target.value);
-                  let dummyfind = lifeExpectancies?.find(
-                    (v) => v.value === val
-                  );
-                  setValues({
-                    ...values,
-                    life_expectancy: {
-                      label: dummyfind.label,
-                      value: dummyfind.value,
-                    },
-                  });
-                }}
-                error={
-                  touched.life_expectancy?.value &&
-                  errors.life_expectancy?.value
-                    ? true
-                    : false
-                }
-                errorText={errors.life_expectancy?.value}
-              />
-              <RadioInput
-                data={genders}
-                label={"Gender"}
-                value={values.gender.value}
-                onchange={(v) => {
-                  setValues({
-                    ...values,
-                    gender: {
-                      name: v.name,
-                      value: v.value,
-                    },
-                  });
-                }}
-              />
+              <div className="col-span-2 flex items-center gap-2">
+                <Checkbox
+                  checked={values.is_longterm_goal}
+                  id="is_longterm_goal"
+                  onChange={(e) => {
+                    setFieldValue("is_longterm_goal", e);
+                  }}
+                  className="group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
+                >
+                  <svg
+                    className="stroke-white opacity-0 group-data-[checked]:opacity-100"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                  >
+                    <path
+                      d="M3 8L6 11L11 3.5"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Checkbox>
+                <label className="text-[#686677] text-base">
+                  Does the goal happen for more than one year?
+                </label>
+              </div>
+              {values.is_longterm_goal ? (
+                <>
+                  <div className="col-span-2">
+                    <label
+                      className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA]`}
+                    >
+                      When does this goal end?{" "}
+                      <span className={`text-red-600`}>*</span>
+                    </label>
+                    <div className="w-full mt-3 space-y-2">
+                      {/* year */}
+                      <div className="flex gap-2 items-center">
+                        <span className="relative flex items-center rounded-full cursor-pointer">
+                          <input
+                            id={"endyear"}
+                            checked={
+                              values.end_timeline?.type === "year"
+                                ? true
+                                : false
+                            }
+                            onChange={() => {
+                              let findtype = endTime.find(
+                                (v) => v.type === "year"
+                              );
+                              setFieldValue("end_timeline", findtype);
+                            }}
+                            name="end_timeline"
+                            type="radio"
+                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                          />
+                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-2.5 w-2.5"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <circle
+                                data-name="ellipse"
+                                cx="8"
+                                cy="8"
+                                r="8"
+                              ></circle>
+                            </svg>
+                          </span>
+                        </span>
+                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                          <p>In the year</p>
+                          <Dropdown
+                            options={years}
+                            value={{
+                              label: endTime?.find((v) => v?.type === "age")
+                                ?.value,
+                              value: endTime?.find((v) => v?.type === "age")
+                                ?.value,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = parseInt(e.target.value);
+                              let dummyyear = years?.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                if (v?.type === "year") {
+                                  return {
+                                    ...v,
+                                    date: moment(new Date())
+                                      .set("year", dummyyear?.value)
+                                      .startOf("y")
+                                      .format(),
+                                    desc: `In ${dummyyear?.value}`,
+                                    value: dummyyear?.value,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {/* age */}
+                      <div className="flex gap-2 items-center">
+                        <span className="relative flex items-center rounded-full cursor-pointer">
+                          <input
+                            id={"endage"}
+                            checked={
+                              values.end_timeline?.type === "age" ? true : false
+                            }
+                            onChange={() => {
+                              let findtype = endTime.find(
+                                (v) => v.type === "age"
+                              );
+                              setFieldValue("end_timeline", findtype);
+                            }}
+                            name="end_timeline"
+                            type="radio"
+                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                          />
+                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-2.5 w-2.5"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <circle
+                                data-name="ellipse"
+                                cx="8"
+                                cy="8"
+                                r="8"
+                              ></circle>
+                            </svg>
+                          </span>
+                        </span>
+                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                          <p>When</p>
+                          <Dropdown
+                            options={members}
+                            value={{
+                              label: endTime?.find((v) => v?.type === "age")
+                                ?.member?.name,
+                              value: endTime?.find((v) => v?.type === "age")
+                                ?.member?._id,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = e.target.value;
+                              let dummymember = members?.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                if (v?.type === "age") {
+                                  return {
+                                    ...v,
+                                    date: getAge(dummymember?.dob, v.value),
+                                    member: {
+                                      _id: dummymember?.value,
+                                      name: dummymember?.label,
+                                      dob: dummymember?.dob,
+                                      age_retire: dummymember?.age_retire,
+                                      life_expectancy:
+                                        dummymember?.life_expectancy,
+                                    },
+                                    desc: `When ${dummymember?.label} is ${
+                                      v.value
+                                    } (${moment(date)?.get("year")})`,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                          <p>is</p>
+                          <Dropdown
+                            options={ages}
+                            value={{
+                              label: endTime?.find((v) => v?.type === "age")
+                                ?.value,
+                              value: endTime?.find((v) => v?.type === "age")
+                                ?.value,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = parseInt(e.target.value);
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                if (v?.type === "age") {
+                                  let dob = getAge(v.member?.dob, val);
+                                  return {
+                                    ...v,
+                                    date: dob,
+                                    desc: `When ${
+                                      v?.member?.name
+                                    } is ${val} (${moment(dob).get("year")})`,
+                                    value: val,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {/* age retire */}
+                      <div className="flex gap-2 items-center">
+                        <span className="relative flex items-center rounded-full cursor-pointer">
+                          <input
+                            id={"endage_retire"}
+                            checked={
+                              values.end_timeline?.type === "age_retire"
+                                ? true
+                                : false
+                            }
+                            onChange={() => {
+                              let findtype = endTime.find(
+                                (v) => v.type === "age_retire"
+                              );
+                              setFieldValue("end_timeline", findtype);
+                            }}
+                            name="end_timeline"
+                            type="radio"
+                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                          />
+                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-2.5 w-2.5"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <circle
+                                data-name="ellipse"
+                                cx="8"
+                                cy="8"
+                                r="8"
+                              ></circle>
+                            </svg>
+                          </span>
+                        </span>
+                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                          <p>When</p>
+                          <Dropdown
+                            options={members}
+                            value={{
+                              label: endTime?.find(
+                                (v) => v?.type === "age_retire"
+                              )?.member?.name,
+                              value: endTime?.find(
+                                (v) => v?.type === "age_retire"
+                              )?.member?._id,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = e.target.value;
+                              let dummymember = members?.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                let age = dummymember?.age_retire + v?.value;
+                                if (v?.type === "age_retire") {
+                                  let findretire = retireagelist.find(
+                                    (d) => d.value === v?.value
+                                  );
+                                  return {
+                                    ...v,
+                                    date: getAge(dummymember?.dob, age),
+                                    member: {
+                                      _id: dummymember?.value,
+                                      name: dummymember?.label,
+                                      dob: dummymember?.dob,
+                                      age_retire: dummymember?.age_retire,
+                                      life_expectancy:
+                                        dummymember?.life_expectancy,
+                                    },
+                                    desc:
+                                      findretire?.value === 0
+                                        ? `when ${
+                                            dummymember?.label
+                                          } retires (${moment(newdate).get(
+                                            "year"
+                                          )})`
+                                        : `${findretire?.label} of ${
+                                            dummymember?.label
+                                          } (${moment(newdate).get("year")})`,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                          <p>reaches</p>
+                          <Dropdown
+                            options={retireagelist}
+                            value={{
+                              label: endTime?.find(
+                                (v) => v?.type === "age_retire"
+                              )?.value,
+                              value: endTime?.find(
+                                (v) => v?.type === "age_retire"
+                              )?.value,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = parseInt(e.target.value);
+                              let findretire = retireagelist.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                let age = v?.member?.age_retire + val;
+                                if (v?.type === "age_retire") {
+                                  let newdate = getAge(v.member?.dob, age);
+                                  return {
+                                    ...v,
+                                    date: newdate,
+                                    value: val,
+                                    desc:
+                                      findretire?.value === 0
+                                        ? `When ${
+                                            v?.member?.name
+                                          } retires (${moment(newdate).get(
+                                            "year"
+                                          )})`
+                                        : `${findretire?.label} of ${
+                                            v?.member?.name
+                                          } (${moment(newdate).get("year")})`,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {/* life expectancy */}
+                      <div className="flex gap-2 items-center">
+                        <span className="relative flex items-center rounded-full cursor-pointer">
+                          <input
+                            id={"endlife_exp"}
+                            checked={
+                              values.end_timeline?.type === "life_exp"
+                                ? true
+                                : false
+                            }
+                            onChange={() => {
+                              let findtype = endTime.find(
+                                (v) => v.type === "life_exp"
+                              );
+                              setFieldValue("end_timeline", findtype);
+                            }}
+                            name="end_timeline"
+                            type="radio"
+                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                          />
+                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-2.5 w-2.5"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <circle
+                                data-name="ellipse"
+                                cx="8"
+                                cy="8"
+                                r="8"
+                              ></circle>
+                            </svg>
+                          </span>
+                        </span>
+                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                          <p>When</p>
+                          <Dropdown
+                            options={members}
+                            value={{
+                              label: endTime?.find(
+                                (v) => v?.type === "life_exp"
+                              )?.member?.name,
+                              value: endTime?.find(
+                                (v) => v?.type === "life_exp"
+                              )?.member?._id,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = e.target.value;
+                              let dummymember = members?.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                let age =
+                                  dummymember?.life_expectancy + v?.value;
+                                if (v?.type === "life_exp") {
+                                  let findretire = lifeExpectancylist.find(
+                                    (d) => d.value === v?.value
+                                  );
+                                  let newdate = getAge(dummymember?.dob, age);
+                                  return {
+                                    ...v,
+                                    date: newdate,
+                                    member: {
+                                      _id: dummymember?.value,
+                                      name: dummymember?.label,
+                                      dob: dummymember?.dob,
+                                      age_retire: dummymember?.age_retire,
+                                      life_expectancy:
+                                        dummymember?.life_expectancy,
+                                    },
+                                    desc:
+                                      dummymember?.value === 0
+                                        ? `When ${
+                                            v?.member?.name
+                                          } retires (${moment(newdate).get(
+                                            "year"
+                                          )})`
+                                        : `${dummymember?.label} of ${
+                                            findretire?.label
+                                          } (${moment(newdate).get("year")})`,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                          <p>reaches</p>
+                          <Dropdown
+                            options={lifeExpectancylist}
+                            value={{
+                              label: endTime?.find(
+                                (v) => v?.type === "life_exp"
+                              )?.value,
+                              value: endTime?.find(
+                                (v) => v?.type === "life_exp"
+                              )?.value,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = parseInt(e.target.value);
+                              let findretire = lifeExpectancylist.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                let age = v?.member?.life_expectancy + val;
+                                if (v?.type === "life_exp") {
+                                  let newdate = getAge(v.member?.dob, age);
+                                  return {
+                                    ...v,
+                                    date: newdate,
+                                    desc:
+                                      findretire?.value === 0
+                                        ? `When ${
+                                            v?.member?.name
+                                          } expires (${moment(newdate).get(
+                                            "year"
+                                          )})`
+                                        : `${findretire?.label} of ${
+                                            v?.member?.name
+                                          } (${moment(newdate).get("year")})`,
+                                    value: val,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      {/* occurances */}
+                      <div className="flex gap-2 items-center">
+                        <span className="relative flex items-center rounded-full cursor-pointer">
+                          <input
+                            id={"endoccurence"}
+                            checked={
+                              values.end_timeline?.type === "occurence"
+                                ? true
+                                : false
+                            }
+                            onChange={() => {
+                              let findtype = endTime.find(
+                                (v) => v.type === "occurence"
+                              );
+                              setFieldValue("end_timeline", findtype);
+                            }}
+                            name="end_timeline"
+                            type="radio"
+                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                          />
+                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-2.5 w-2.5"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <circle
+                                data-name="ellipse"
+                                cx="8"
+                                cy="8"
+                                r="8"
+                              ></circle>
+                            </svg>
+                          </span>
+                        </span>
+                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                          <p>After</p>
+                          <Dropdown
+                            options={lifeOccurences}
+                            value={{
+                              label: endTime?.find(
+                                (v) => v?.type === "occurence"
+                              )?.value,
+                              value: endTime?.find(
+                                (v) => v?.type === "occurence"
+                              )?.value,
+                            }}
+                            mainClass="w-max"
+                            onchange={(e) => {
+                              let val = parseInt(e.target.value);
+                              let dummyoccu = lifeOccurences?.find(
+                                (v) => v.value === val
+                              );
+                              let dummyendtime = [...endTime];
+                              dummyendtime = dummyendtime.map((v) => {
+                                if (v?.type === "occurence") {
+                                  return {
+                                    ...v,
+                                    date: getAge(new Date().toISOString(), val),
+                                    desc: `After ${val} occurences`,
+                                    value: dummyoccu?.value,
+                                  };
+                                }
+                                return { ...v };
+                              });
+                              setEndTime(dummyendtime);
+                            }}
+                          />
+                          <p>occurences</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <Dropdown
+                    options={goalOftenLists}
+                    value={{
+                      label: values.goal_often,
+                      value: parseInt(values.goal_often),
+                    }}
+                    mainClass="w-full"
+                    onchange={(e) => {
+                      let val = parseInt(e.target.value);
+                      let dummyoften = goalOftenLists.find(
+                        (v) => v.value === val
+                      );
+                      setFieldValue("goal_often", dummyoften?.value);
+                    }}
+                  />
+                </>
+              ) : (
+                <></>
+              )}
             </div>
-            <div className="mt-5">
+            <div className="mt-10">
               <div className="grid grid-cols-2 gap-5">
                 {loading ? (
                   <div className="flex justify-center items-center col-span-2 rounded-lg py-2">
@@ -455,7 +1554,7 @@ export default function Add(props) {
                 )}
               </div>
             </div>
-          </form> */}
+          </form>
         </div>
       </div>
     </Layout>
@@ -477,7 +1576,7 @@ export const getServerSideProps = async (ctx) => {
   if (!ctx?.query?.goal_type) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/goals",
         permanent: false,
       },
     };

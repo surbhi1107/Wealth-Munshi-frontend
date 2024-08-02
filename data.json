@@ -1402,5 +1402,252 @@
       "label": "+263",
       "value": "ZW"
     }
+  ],
+  "retire_ages": [
+    {
+      "label": "10 years before retirement",
+      "value": -10
+    },
+    {
+      "label": "9 years before retirement",
+      "value": -9
+    },
+    {
+      "label": "8 years before retirement",
+      "value": -8
+    },
+    {
+      "label": "7 years before retirement",
+      "value": -7
+    },
+    {
+      "label": "6 years before retirement",
+      "value": -6
+    },
+    {
+      "label": "5 years before retirement",
+      "value": -5
+    },
+    {
+      "label": "4 years before retirement",
+      "value": -4
+    },
+    {
+      "label": "3 years before retirement",
+      "value": -3
+    },
+    {
+      "label": "2 years before retirement",
+      "value": -2
+    },
+    {
+      "label": "1 years before retirement",
+      "value": -1
+    },
+    {
+      "label": "retirement age",
+      "value": 0
+    },
+    {
+      "label": "1 years after retirement",
+      "value": 1
+    },
+    {
+      "label": "2 years after retirement",
+      "value": 2
+    },
+    {
+      "label": "3 years after retirement",
+      "value": 3
+    },
+    {
+      "label": "4 years after retirement",
+      "value": 4
+    },
+    {
+      "label": "5 years after retirement",
+      "value": 5
+    },
+    {
+      "label": "6 years after retirement",
+      "value": 6
+    },
+    {
+      "label": "7 years after retirement",
+      "value": 7
+    },
+    {
+      "label": "8 years after retirement",
+      "value": 8
+    },
+    {
+      "label": "9 years after retirement",
+      "value": 9
+    },
+    {
+      "label": "10 years after retirement",
+      "value": 10
+    }
+  ],
+  "life_expectation": [
+    {
+      "label": "10 years before expiry",
+      "value": -10
+    },
+    {
+      "label": "9 years before expiry",
+      "value": -9
+    },
+    {
+      "label": "8 years before expiry",
+      "value": -8
+    },
+    {
+      "label": "7 years before expiry",
+      "value": -7
+    },
+    {
+      "label": "6 years before expiry",
+      "value": -6
+    },
+    {
+      "label": "5 years before expiry",
+      "value": -5
+    },
+    {
+      "label": "4 years before expiry",
+      "value": -4
+    },
+    {
+      "label": "3 years before expiry",
+      "value": -3
+    },
+    {
+      "label": "2 years before expiry",
+      "value": -2
+    },
+    {
+      "label": "1 years before expiry",
+      "value": -1
+    },
+    {
+      "label": "life expectancy",
+      "value": 0
+    },
+    {
+      "label": "1 years after expiry",
+      "value": 1
+    },
+    {
+      "label": "2 years after expiry",
+      "value": 2
+    },
+    {
+      "label": "3 years after expiry",
+      "value": 3
+    },
+    {
+      "label": "4 years after expiry",
+      "value": 4
+    },
+    {
+      "label": "5 years after expiry",
+      "value": 5
+    },
+    {
+      "label": "6 years after expiry",
+      "value": 6
+    },
+    {
+      "label": "7 years after expiry",
+      "value": 7
+    },
+    {
+      "label": "8 years after expiry",
+      "value": 8
+    },
+    {
+      "label": "9 years after expiry",
+      "value": 9
+    },
+    {
+      "label": "10 years after expiry",
+      "value": 10
+    }
+  ],
+  "occurences": [
+    {
+      "label": "2",
+      "value": 2
+    },
+    {
+      "label": "3",
+      "value": 3
+    },
+    {
+      "label": "4",
+      "value": 4
+    },
+    {
+      "label": "5",
+      "value": 5
+    },
+    {
+      "label": "6",
+      "value": 6
+    },
+    {
+      "label": "7",
+      "value": 7
+    },
+    {
+      "label": "8",
+      "value": 8
+    },
+    {
+      "label": "9",
+      "value": 9
+    },
+    {
+      "label": "10",
+      "value": 10
+    },
+    {
+      "label": "11",
+      "value": 11
+    },
+    {
+      "label": "12",
+      "value": 12
+    },
+    {
+      "label": "13",
+      "value": 13
+    },
+    {
+      "label": "14",
+      "value": 14
+    },
+    {
+      "label": "15",
+      "value": 15
+    }
+  ],
+  "goalOften": [
+    { "label": "Every Year", "value": 1 },
+    { "label": "Every 2 Year", "value": 2 },
+    { "label": "Every 3 Year", "value": 3 },
+    { "label": "Every 4 Year", "value": 4 },
+    { "label": "Every 5 Year", "value": 5 },
+    { "label": "Every 6 Year", "value": 6 },
+    { "label": "Every 7 Year", "value": 7 },
+    { "label": "Every 8 Year", "value": 8 },
+    { "label": "Every 9 Year", "value": 9 },
+    { "label": "Every 10 Year", "value": 10 },
+    { "label": "Every 11 Year", "value": 11 },
+    { "label": "Every 12 Year", "value": 12 },
+    { "label": "Every 13 Year", "value": 13 },
+    { "label": "Every 14 Year", "value": 14 },
+    { "label": "Every 15 Year", "value": 15 }
   ]
 }

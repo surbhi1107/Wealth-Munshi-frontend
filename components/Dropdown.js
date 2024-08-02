@@ -3,6 +3,7 @@ const Dropdown = ({
   value,
   onchange,
   label,
+  mainClass = "",
   dropdownOuterClass = "",
   dropdownClass = "",
   labelClass = "",
@@ -13,7 +14,7 @@ const Dropdown = ({
   let newVal = options.find((v) => v?.value === value?.value) ?? {};
   return (
     <>
-      <div className="w-full">
+      <div className={`w-full ${mainClass}`}>
         {label && (
           <label
             className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] ${labelClass}`}

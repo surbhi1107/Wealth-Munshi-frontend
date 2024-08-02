@@ -18,7 +18,8 @@
 }
 
 body {
-  font-family: 'poppins', sans-serif !important; 
+  /* font-family: 'poppins', sans-serif !important;  */
+  font-family: "Poppins","ui-sans-serif","system-ui","-apple-system","BlinkMacSystemFont","Segoe UI,Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"; 
   /* color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
