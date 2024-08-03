@@ -11,6 +11,11 @@ let Menus = [
   },
   { title: "Risk Profile", href: "/risk-profile", pathnames: ["risk-profile"] },
   { title: "Goals", href: "/goals", pathnames: ["goals"] },
+  {
+    title: "Your Resources",
+    href: "/resources",
+    pathnames: ["resources", "income", "assets", "debt", "summary"],
+  },
   { title: "Cashflow", href: "/cash-flow", pathnames: ["cash-flow"] },
   { title: "Summary", href: "/summary", pathnames: ["summary"] },
 ];

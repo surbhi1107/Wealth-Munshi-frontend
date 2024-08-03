@@ -165,7 +165,7 @@ let familyMemberType = [
   },
   {
     name: "Sister (Elder)",
-    value: "sister_elder)",
+    value: "sister_elder",
     icon: () => (
       <svg
         width="25"
@@ -761,7 +761,9 @@ export default function Home(props) {
             <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
               Client Household
             </h1>
-            {isUserDob && user?.client_type === -1 ? (
+            {isUserDob &&
+            user?.client_type === -1 &&
+            partnerData?.length <= 1 ? (
               <button
                 onClick={() => {
                   router.push("/partner/add");
