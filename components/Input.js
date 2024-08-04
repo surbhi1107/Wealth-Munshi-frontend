@@ -15,6 +15,7 @@ const Input = ({
   require = false,
   requireClass = "",
   labelClass = "",
+  mainClass = "",
   ...props
 }) => {
   let dummytype = isPassword ? "password" : keytype;
@@ -27,7 +28,7 @@ const Input = ({
     setShowPassword(!showPassword);
   };
   return (
-    <div className="w-full space-y-1">
+    <div className={`w-full space-y-1 ${mainClass}`}>
       {label && (
         <label
           className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] ${labelClass}`}

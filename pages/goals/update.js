@@ -339,7 +339,6 @@ export default function Update(props) {
       data?.is_longterm_goal && setEndTime([...dummyend]);
     } else {
       setLoading(false);
-      setMembers([]);
     }
   };
 

@@ -1649,5 +1649,12 @@
     { "label": "Every 13 Year", "value": 13 },
     { "label": "Every 14 Year", "value": 14 },
     { "label": "Every 15 Year", "value": 15 }
+  ],
+  "timeline": [
+    { "label": "Per year", "value": "year" },
+    { "label": "Per month", "value": "month" },
+    { "label": "Per fortnight", "value": "fortnight" },
+    { "label": "Per Quarter", "value": "quarter" },
+    { "label": "Per week", "value": "week" }
   ]
 }

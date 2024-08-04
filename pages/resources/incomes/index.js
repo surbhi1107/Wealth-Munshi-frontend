@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import * as cookie from "cookie";
 import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
 
 let assetsType = [
   {
@@ -315,59 +316,72 @@ let assetsType = [
   },
 ];
 
-export default function Resources() {
+export default function Incomes() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [openPopUp, setOpenPopUp] = useState(false);
-  const [resources, setResources] = useState([]);
+  const [incomes, setIncomes] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   let ignore = false;
 
   const getData = async () => {
     setLoading(true);
-    let response = await fetch(`/api/resources/get-all-resources`, {
+    let response = await fetch(`/api/incomes/get-all-incomes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        isAssest: false,
-      }),
     });
     let res1 = await response.json();
-    if (res1?.success) {
+    if (res1?.data?.length > 0) {
       setLoading(false);
-      setResources(res1?.data);
+      setIncomes(res1?.data);
     } else {
       setLoading(false);
-      setResources([]);
+      setIncomes([]);
     }
   };
 
-  const deleteinvestment = async (_id) => {
+  const deleteincome = async (_id) => {
     try {
       setLoading(true);
-      let response = await fetch(`/api/resources/delete`, {
+      let response = await fetch(`/api/incomes/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ assetId: _id }),
+        body: JSON.stringify({ incomeId: _id }),
       });
       let res1 = await response.json();
       if (res1?.success) {
+        successToast(res1?.msg);
         setLoading(false);
         getData();
       } else {
+        errorToast(res1?.error);
         setLoading(false);
       }
     } catch (error) {
       console.error(error);
+      errorToast(
+        error.response ? error.response.data.error : "An error occurred"
+      );
       setLoading(false);
       setError(
         error.response ? error.response.data.error : "An error occurred"
       );
     }
+  };
+  const successToast = (msg) => {
+    toast.success(msg, {
+      position: "top-right",
+    });
+  };
+
+  const errorToast = (msg) => {
+    toast.error(msg, {
+      position: "top-right",
+    });
   };
 
   useEffect(() => {
@@ -381,12 +395,13 @@ export default function Resources() {
 
   return (
     <Layout>
+      <ToastContainer />
       <div className={`w-full space-y-6`}>
-        {/* Asset Details */}
+        {/* Income Details */}
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <div className="w-full md:flex justify-between space-y-4 md:space-y-0">
             <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-              Asset
+              Income
             </h1>
             <button
               onClick={() => {
@@ -394,7 +409,7 @@ export default function Resources() {
               }}
               className="w-full md:w-auto border border-[#57BA52] rounded-lg py-2 bg-transparent px-8 font-medium text-[#57BA52]"
             >
-              Add New Investment
+              Add New Income
             </button>
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto max-w-7xl 2xl:max-w-none">
@@ -424,7 +439,7 @@ export default function Resources() {
                       </div>
                     </td>
                   </tr>
-                ) : resources?.length === 0 ? (
+                ) : incomes?.length === 0 ? (
                   <tr>
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center text-[#54577A] text-sm font-medium">
@@ -433,7 +448,7 @@ export default function Resources() {
                     </td>
                   </tr>
                 ) : (
-                  resources?.map((v, index) => (
+                  incomes?.map((v, index) => (
                     <tr
                       className={`bg-white text-[#54577A] text-sm font-medium`}
                       key={index}
@@ -442,14 +457,17 @@ export default function Resources() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap capitalize`}>
-                        {`${v?.type?.replace("_", " ")} (${
-                          v?.owner?.fname
-                        }'s ${v?.type?.replace("_", " ")})`}
+                        {`${v?.type?.replace("_", " ")} ${
+                          v?.income_owner?.fname?.length > 0
+                            ? `(${v?.income_owner?.fname}'s ${v?.type?.replace(
+                                "_",
+                                " "
+                              )})`
+                            : ""
+                        }`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {`Rs. ${v?.curr_valuation} as of ${moment(
-                          v?.createdAt
-                        ).format("DD/MM/YYYY")}`}
+                        {`Rs. ${v?.amount}`}
                       </td>
                       <td
                         className={`py-5 px-3 flex items-center justify-center space-x-3`}
@@ -458,8 +476,8 @@ export default function Resources() {
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
                             router.push({
-                              pathname: "/resources/investments/update/",
-                              query: { investmentId: v._id },
+                              pathname: "/resources/incomes/update/",
+                              query: { incomeId: v._id },
                             });
                           }}
                         >
@@ -499,7 +517,7 @@ export default function Resources() {
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
-                            deleteinvestment(v?._id);
+                            deleteincome(v?._id);
                           }}
                         >
                           <svg
@@ -539,18 +557,18 @@ export default function Resources() {
         <PopUp
           isOpen={openPopUp}
           closePopUp={() => setOpenPopUp(false)}
-          title="Add new Investment"
+          title="Add New Income"
           isClose
         >
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-5">
             {assetsType.map((v, i) => (
               <Link
                 href={{
-                  pathname: `/resources/investments/add`,
-                  query: { investment_type: JSON.stringify(v) },
+                  pathname: `/resources/incomes/add`,
+                  query: { income_type: JSON.stringify(v) },
                 }}
                 key={i}
-                as={`/resources/investments/add`}
+                as={`/resources/incomes/add`}
                 className="w-full bg-white hover:bg-[#F5FAF5] border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}

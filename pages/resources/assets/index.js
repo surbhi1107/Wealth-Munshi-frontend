@@ -331,7 +331,7 @@ export default function Resources() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        isAssest: false,
+        isAssest: true,
       }),
     });
     let res1 = await response.json();
@@ -344,7 +344,7 @@ export default function Resources() {
     }
   };
 
-  const deleteinvestment = async (_id) => {
+  const deleteAssets = async (_id) => {
     try {
       setLoading(true);
       let response = await fetch(`/api/resources/delete`, {
@@ -394,7 +394,7 @@ export default function Resources() {
               }}
               className="w-full md:w-auto border border-[#57BA52] rounded-lg py-2 bg-transparent px-8 font-medium text-[#57BA52]"
             >
-              Add New Investment
+              Add New Asset
             </button>
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto max-w-7xl 2xl:max-w-none">
@@ -458,8 +458,8 @@ export default function Resources() {
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
                             router.push({
-                              pathname: "/resources/investments/update/",
-                              query: { investmentId: v._id },
+                              pathname: "/resources/assets/update/",
+                              query: { assetId: v._id },
                             });
                           }}
                         >
@@ -499,7 +499,7 @@ export default function Resources() {
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
-                            deleteinvestment(v?._id);
+                            deleteAssets(v?._id);
                           }}
                         >
                           <svg
@@ -539,18 +539,18 @@ export default function Resources() {
         <PopUp
           isOpen={openPopUp}
           closePopUp={() => setOpenPopUp(false)}
-          title="Add new Investment"
+          title="Add new Asset"
           isClose
         >
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-5">
             {assetsType.map((v, i) => (
               <Link
                 href={{
-                  pathname: `/resources/investments/add`,
-                  query: { investment_type: JSON.stringify(v) },
+                  pathname: `/resources/assets/add`,
+                  query: { asset_type: JSON.stringify(v) },
                 }}
                 key={i}
-                as={`/resources/investments/add`}
+                as={`/resources/assets/add`}
                 className="w-full bg-white hover:bg-[#F5FAF5] border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}
