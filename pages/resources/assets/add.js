@@ -184,6 +184,7 @@ export default function Add(props) {
           surplusgoal_state: values.surplusgoalselected,
           ...(values?.goalselected === "specific"
             ? {
+                surplusgoal_state: values.surplusgoalselected,
                 surplus_goals: values.surplus_goals?.map((v) => {
                   return v?.value;
                 }),
@@ -334,7 +335,7 @@ export default function Add(props) {
       setLoading(false);
       let dummygoals = res1?.data?.map((v) => {
         return {
-          label: v?.type?.replace("_", " "),
+          label: v?.type?.replace(/_/g, " "),
           value: v?._id,
         };
       });
@@ -426,7 +427,7 @@ export default function Add(props) {
               </svg>
             </div>
             <p className="text-[15px] capitalize font-semibold text-[#45486A]">
-              {props?.state?.name?.replace("_", " ")}
+              {props?.state?.name?.replace(/_/g, " ")}
             </p>
           </div>
           <p className="text-base text-[#A1A1AA] !mt-3">

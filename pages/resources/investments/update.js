@@ -251,9 +251,9 @@ export default function Add(props) {
               return v?.value;
             }),
             goal_state: values.goalselected,
-            surplusgoal_state: values.surplusgoalselected,
             ...(values?.goalselected === "specific"
               ? {
+                  surplusgoal_state: values.surplusgoalselected,
                   surplus_goals: values.surplus_goals?.map((v) => {
                     return v?.value;
                   }),
@@ -405,7 +405,7 @@ export default function Add(props) {
       setLoading(false);
       let dummygoals = res1?.data?.map((v) => {
         return {
-          label: v?.type?.replace("_", " "),
+          label: v?.type?.replace(/_/g, " "),
           value: v?._id,
         };
       });
@@ -440,10 +440,10 @@ export default function Add(props) {
     if (res1?.success) {
       let data = res1?.data;
       let dummygoals = data?.goals?.map((v) => {
-        return { value: v?._id, label: v?.type?.replace("_", " ") };
+        return { value: v?._id, label: v?.type?.replace(/_/g, " ") };
       });
       let dummysurgoals = data?.surplus_goals?.map((v) => {
-        return { value: v?._id, label: v?.type?.replace("_", " ") };
+        return { value: v?._id, label: v?.type?.replace(/_/g, " ") };
       });
       let starttime = {
         ...data.resources_access_time,
@@ -561,7 +561,7 @@ export default function Add(props) {
               </svg>
             </div>
             <p className="text-[15px] capitalize font-semibold text-[#45486A]">
-              {values.type?.replace("_", " ")}
+              {values.type?.replace(/_/g, " ")}
             </p>
           </div>
           <p className="text-base text-[#A1A1AA] !mt-3">

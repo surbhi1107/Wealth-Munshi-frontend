@@ -854,7 +854,7 @@ export default function Home(props) {
                         <td
                           className={`py-1 px-3 whitespace-nowrap capitalize`}
                         >
-                          {v?.type?.length ? v?.type?.replace("_", " ") : "-"}
+                          {v?.type?.length ? v?.type?.replace(/_/g, " ") : "-"}
                         </td>
                         <td className={`py-1 px-3 whitespace-nowrap`}>
                           {`${
@@ -1027,7 +1027,7 @@ export default function Home(props) {
                         <td
                           className={`py-1 px-3 whitespace-nowrap capitalize`}
                         >
-                          {v?.type?.length ? v?.type?.replace("_", " ") : "-"}
+                          {v?.type?.length ? v?.type?.replace(/_/g, " ") : "-"}
                         </td>
                         <td className={`py-1 px-3 whitespace-nowrap`}>
                           {`${
@@ -1370,7 +1370,9 @@ export default function Home(props) {
                           <td
                             className={`py-1 px-3 whitespace-nowrap capitalize`}
                           >
-                            {v?.type?.length ? v?.type?.replace("_", " ") : "-"}
+                            {v?.type?.length
+                              ? v?.type?.replace(/_/g, " ")
+                              : "-"}
                           </td>
                           <td className={`py-1 px-3 whitespace-nowrap`}>
                             {`${

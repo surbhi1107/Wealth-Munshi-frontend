@@ -479,7 +479,9 @@ export default function Goals() {
                             {index + 1}
                           </td>
                           <td className={`py-1 px-3 whitespace-nowrap`}>
-                            {v?.type?.length ? v?.type?.replace("_", " ") : "-"}
+                            {v?.type?.length
+                              ? v?.type?.replace(/_/g, " ")
+                              : "-"}
                           </td>
                           <td
                             className={`py-1 px-3 whitespace-nowrap capitalize`}

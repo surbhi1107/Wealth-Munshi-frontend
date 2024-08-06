@@ -2,7 +2,7 @@ import * as cookie from "cookie";
 import GetIncome from "@/components/income/GetIncome";
 
 export default function Incomes() {
-  return <GetIncome isCashFlow={false} />;
+  return <GetIncome isCashFlow={true} />;
 }
 
 export const getServerSideProps = async (ctx) => {

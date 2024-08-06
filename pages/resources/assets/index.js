@@ -442,9 +442,9 @@ export default function Resources() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap capitalize`}>
-                        {`${v?.type?.replace("_", " ")} (${
+                        {`${v?.type?.replace(/_/g, " ")} (${
                           v?.owner?.fname
-                        }'s ${v?.type?.replace("_", " ")})`}
+                        }'s ${v?.type?.replace(/_/g, " ")})`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
                         {`Rs. ${v?.curr_valuation} as of ${moment(

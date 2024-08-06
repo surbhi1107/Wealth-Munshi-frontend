@@ -2,9 +2,7 @@ import * as cookie from "cookie";
 import AddIncome from "@/components/income/AddIncome";
 
 export default function CashflowAddincome(props) {
-  return (
-    <AddIncome isCashFlow={false} income_type={props.income_type?.value} />
-  );
+  return <AddIncome isCashFlow={true} income_type={props.income_type?.value} />;
 }
 
 export const getServerSideProps = async (ctx) => {

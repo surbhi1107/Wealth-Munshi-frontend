@@ -1,10 +1,8 @@
 import * as cookie from "cookie";
-import AddIncome from "@/components/income/AddIncome";
+import UpdateIncome from "@/components/income/UpdateIncome";
 
-export default function CashflowAddincome(props) {
-  return (
-    <AddIncome isCashFlow={false} income_type={props.income_type?.value} />
-  );
+export default function CashflowUpdateIncomes(props) {
+  return <UpdateIncome isCashFlow={true} incomeId={props.incomeId} />;
 }
 
 export const getServerSideProps = async (ctx) => {
@@ -19,7 +17,7 @@ export const getServerSideProps = async (ctx) => {
       },
     };
   }
-  if (!ctx?.query?.income_type) {
+  if (!ctx?.query?.incomeId) {
     return {
       redirect: {
         destination: "/resources/incomes",
@@ -27,9 +25,6 @@ export const getServerSideProps = async (ctx) => {
       },
     };
   }
-  let income_type =
-    ctx?.query?.income_type === undefined
-      ? ""
-      : JSON.parse(ctx?.query?.income_type);
-  return { props: { income_type, user } };
+  let incomeId = ctx?.query?.incomeId;
+  return { props: { incomeId, user } };
 };

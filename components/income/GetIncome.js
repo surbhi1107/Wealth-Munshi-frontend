@@ -7,11 +7,12 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import * as cookie from "cookie";
 import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
 
-let assetsType = [
+let incomeTypes = [
   {
-    name: "Cash in Hand",
-    value: "cash_in_hand",
+    name: "Business Incomed",
+    value: "business_income",
     icon: () => (
       <svg
         width="25"
@@ -36,8 +37,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Commercial Property",
-    value: "commercial_property",
+    name: "Dividend Income",
+    value: "dividendincome",
     icon: () => (
       <svg
         width="25"
@@ -54,8 +55,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Employee Provident Scheme",
-    value: "employee_provident_scheme",
+    name: "Goverment Pension",
+    value: "govermentpension",
     icon: () => (
       <svg
         width="25"
@@ -80,8 +81,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Fixed Deposit",
-    value: "fixed_deposit",
+    name: "Interest Income",
+    value: "interest_income",
     icon: () => (
       <svg
         width="25"
@@ -106,8 +107,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Gold",
-    value: "gold",
+    name: "Net Salary Income",
+    value: "net_salary_income",
     icon: () => (
       <svg
         width="25"
@@ -132,8 +133,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Investment Property",
-    value: "investment_property",
+    name: "Other Income",
+    value: "other_income",
     icon: () => (
       <svg
         width="25"
@@ -158,8 +159,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Life Insurance/ULIP",
-    value: "life_insurance/ULIP",
+    name: "Other Retirement Income",
+    value: "other_retirement_income",
     icon: () => (
       <svg
         width="25"
@@ -184,8 +185,8 @@ let assetsType = [
     ),
   },
   {
-    name: "Mutual Fund Savings/SIP",
-    value: "mutual_fund_savings/sip",
+    name: "Professional Income",
+    value: "professional_income",
     icon: () => (
       <svg
         width="25"
@@ -210,8 +211,8 @@ let assetsType = [
     ),
   },
   {
-    name: "NSC/KVP",
-    value: "nsc/kvp",
+    name: "Rental Income",
+    value: "rental_income",
     icon: () => (
       <svg
         width="25"
@@ -236,60 +237,8 @@ let assetsType = [
     ),
   },
   {
-    name: "other",
-    value: "other",
-    icon: () => (
-      <svg
-        width="25"
-        height="25"
-        viewBox="0 0 36 36"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M16.9453 5.83594C16.9453 5.25347 17.4175 4.78125 18 4.78125C18.5825 4.78125 19.0547 5.25347 19.0547 5.83594V6.46875H24.3281V4.21875C24.3281 1.89253 22.4356 0 20.1094 0H15.8906C13.5644 0 11.6719 1.89253 11.6719 4.21875V6.46875H16.9453V5.83594ZM18 18.3516C21.4893 18.3516 24.3281 15.5128 24.3281 12.0234V8.57812H11.6719V12.0234C11.6719 15.5128 14.5107 18.3516 18 18.3516ZM28.125 8.57812H24.3281V6.46875H28.125C28.7075 6.46875 29.1797 6.94097 29.1797 7.52344C29.1797 8.10591 28.7075 8.57812 28.125 8.57812ZM18 20.4609C16.5217 20.4609 15.1314 20.0784 13.9219 19.4077V20.4737L13.0563 20.6819C14.3539 22.2956 16.1113 23.2031 18 23.2031C19.8887 23.2031 21.6461 22.2956 22.9437 20.6819L22.0781 20.4737V19.4077C20.8686 20.0784 19.4783 20.4609 18 20.4609Z"
-          fill="#57BA52"
-        />
-        <path
-          d="M18 31.5C18.9708 31.5 19.7578 31.0908 19.7578 30.5859C19.7578 30.0811 18.9708 29.6719 18 29.6719C17.0292 29.6719 16.2422 30.0811 16.2422 30.5859C16.2422 31.0908 17.0292 31.5 18 31.5Z"
-          fill="#57BA52"
-        />
-        <path
-          d="M28.4671 22.0109L25.1627 21.2158C23.4603 23.7871 20.804 25.3126 18 25.3126C15.196 25.3126 12.5397 23.7871 10.8373 21.2159L7.53286 22.011C5.78855 22.4307 4.57031 23.9768 4.57031 25.7709V34.9454C4.57031 35.5279 5.04253 36.0001 5.625 36.0001H8.92969V32.2032C8.92969 31.6207 9.40191 31.1485 9.98438 31.1485C10.5668 31.1485 11.0391 31.6207 11.0391 32.2032V36.0001H24.9609V32.2032C24.9609 31.6207 25.4332 31.1485 26.0156 31.1485C26.5981 31.1485 27.0703 31.6207 27.0703 32.2032V36.0001H30.375C30.9575 36.0001 31.4297 35.5279 31.4297 34.9454V25.7709C31.4297 23.9768 30.2115 22.4307 28.4671 22.0109ZM18 33.6095C15.8315 33.6095 14.1328 32.2814 14.1328 30.586C14.1328 28.8906 15.8315 27.5626 18 27.5626C20.1685 27.5626 21.8672 28.8906 21.8672 30.586C21.8672 32.2814 20.1685 33.6095 18 33.6095Z"
-          fill="#57BA52"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: "Other Govt. Schemes",
-    value: "other_govt_schemes",
-    icon: () => (
-      <svg
-        width="25"
-        height="25"
-        viewBox="0 0 36 36"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M16.9453 5.83594C16.9453 5.25347 17.4175 4.78125 18 4.78125C18.5825 4.78125 19.0547 5.25347 19.0547 5.83594V6.46875H24.3281V4.21875C24.3281 1.89253 22.4356 0 20.1094 0H15.8906C13.5644 0 11.6719 1.89253 11.6719 4.21875V6.46875H16.9453V5.83594ZM18 18.3516C21.4893 18.3516 24.3281 15.5128 24.3281 12.0234V8.57812H11.6719V12.0234C11.6719 15.5128 14.5107 18.3516 18 18.3516ZM28.125 8.57812H24.3281V6.46875H28.125C28.7075 6.46875 29.1797 6.94097 29.1797 7.52344C29.1797 8.10591 28.7075 8.57812 28.125 8.57812ZM18 20.4609C16.5217 20.4609 15.1314 20.0784 13.9219 19.4077V20.4737L13.0563 20.6819C14.3539 22.2956 16.1113 23.2031 18 23.2031C19.8887 23.2031 21.6461 22.2956 22.9437 20.6819L22.0781 20.4737V19.4077C20.8686 20.0784 19.4783 20.4609 18 20.4609Z"
-          fill="#57BA52"
-        />
-        <path
-          d="M18 31.5C18.9708 31.5 19.7578 31.0908 19.7578 30.5859C19.7578 30.0811 18.9708 29.6719 18 29.6719C17.0292 29.6719 16.2422 30.0811 16.2422 30.5859C16.2422 31.0908 17.0292 31.5 18 31.5Z"
-          fill="#57BA52"
-        />
-        <path
-          d="M28.4671 22.0109L25.1627 21.2158C23.4603 23.7871 20.804 25.3126 18 25.3126C15.196 25.3126 12.5397 23.7871 10.8373 21.2159L7.53286 22.011C5.78855 22.4307 4.57031 23.9768 4.57031 25.7709V34.9454C4.57031 35.5279 5.04253 36.0001 5.625 36.0001H8.92969V32.2032C8.92969 31.6207 9.40191 31.1485 9.98438 31.1485C10.5668 31.1485 11.0391 31.6207 11.0391 32.2032V36.0001H24.9609V32.2032C24.9609 31.6207 25.4332 31.1485 26.0156 31.1485C26.5981 31.1485 27.0703 31.6207 27.0703 32.2032V36.0001H30.375C30.9575 36.0001 31.4297 35.5279 31.4297 34.9454V25.7709C31.4297 23.9768 30.2115 22.4307 28.4671 22.0109ZM18 33.6095C15.8315 33.6095 14.1328 32.2814 14.1328 30.586C14.1328 28.8906 15.8315 27.5626 18 27.5626C20.1685 27.5626 21.8672 28.8906 21.8672 30.586C21.8672 32.2814 20.1685 33.6095 18 33.6095Z"
-          fill="#57BA52"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: "Portfolio",
-    value: "portfolio",
+    name: "Work Pension",
+    value: "work_pension",
     icon: () => (
       <svg
         width="25"
@@ -315,59 +264,73 @@ let assetsType = [
   },
 ];
 
-export default function Resources() {
+const GetIncome = (props) => {
+  let isCashFlow = props.isCashFlow;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [openPopUp, setOpenPopUp] = useState(false);
-  const [resources, setResources] = useState([]);
+  const [incomes, setIncomes] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   let ignore = false;
 
   const getData = async () => {
     setLoading(true);
-    let response = await fetch(`/api/resources/get-all-resources`, {
+    let response = await fetch(`/api/incomes/get-all-incomes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        isAssest: false,
-      }),
     });
     let res1 = await response.json();
-    if (res1?.success) {
+    if (res1?.data?.length > 0) {
       setLoading(false);
-      setResources(res1?.data);
+      setIncomes(res1?.data);
     } else {
       setLoading(false);
-      setResources([]);
+      setIncomes([]);
     }
   };
 
-  const deleteinvestment = async (_id) => {
+  const deleteincome = async (_id) => {
     try {
       setLoading(true);
-      let response = await fetch(`/api/resources/delete`, {
+      let response = await fetch(`/api/incomes/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ assetId: _id }),
+        body: JSON.stringify({ incomeId: _id }),
       });
       let res1 = await response.json();
       if (res1?.success) {
+        successToast(res1?.msg);
         setLoading(false);
         getData();
       } else {
+        errorToast(res1?.error);
         setLoading(false);
       }
     } catch (error) {
       console.error(error);
+      errorToast(
+        error.response ? error.response.data.error : "An error occurred"
+      );
       setLoading(false);
       setError(
         error.response ? error.response.data.error : "An error occurred"
       );
     }
+  };
+  const successToast = (msg) => {
+    toast.success(msg, {
+      position: "top-right",
+    });
+  };
+
+  const errorToast = (msg) => {
+    toast.error(msg, {
+      position: "top-right",
+    });
   };
 
   useEffect(() => {
@@ -381,12 +344,13 @@ export default function Resources() {
 
   return (
     <Layout>
+      <ToastContainer />
       <div className={`w-full space-y-6`}>
-        {/* Asset Details */}
+        {/* Income Details */}
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <div className="w-full md:flex justify-between space-y-4 md:space-y-0">
             <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-              Asset
+              Income
             </h1>
             <button
               onClick={() => {
@@ -394,7 +358,7 @@ export default function Resources() {
               }}
               className="w-full md:w-auto border border-[#57BA52] rounded-lg py-2 bg-transparent px-8 font-medium text-[#57BA52]"
             >
-              Add New Investment
+              Add New Income
             </button>
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto max-w-7xl 2xl:max-w-none">
@@ -424,7 +388,7 @@ export default function Resources() {
                       </div>
                     </td>
                   </tr>
-                ) : resources?.length === 0 ? (
+                ) : incomes?.length === 0 ? (
                   <tr>
                     <td colSpan={7}>
                       <div className="w-full h-[40px] mt-5 flex justify-center items-center text-[#54577A] text-sm font-medium">
@@ -433,7 +397,7 @@ export default function Resources() {
                     </td>
                   </tr>
                 ) : (
-                  resources?.map((v, index) => (
+                  incomes?.map((v, index) => (
                     <tr
                       className={`bg-white text-[#54577A] text-sm font-medium`}
                       key={index}
@@ -442,14 +406,17 @@ export default function Resources() {
                         {index + 1}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap capitalize`}>
-                        {`${v?.type?.replace(/_/g, " ")} (${
-                          v?.owner?.fname
-                        }'s ${v?.type?.replace(/_/g, " ")})`}
+                        {`${v?.type?.replace(/_/g, " ")} ${
+                          v?.income_owner?.fname?.length > 0
+                            ? `(${v?.income_owner?.fname}'s ${v?.type?.replace(
+                                /_/g,
+                                " "
+                              )})`
+                            : ""
+                        }`}
                       </td>
                       <td className={`py-1 px-3 whitespace-nowrap`}>
-                        {`Rs. ${v?.curr_valuation} as of ${moment(
-                          v?.createdAt
-                        ).format("DD/MM/YYYY")}`}
+                        {`Rs. ${v?.amount}`}
                       </td>
                       <td
                         className={`py-5 px-3 flex items-center justify-center space-x-3`}
@@ -458,8 +425,10 @@ export default function Resources() {
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
                             router.push({
-                              pathname: "/resources/investments/update/",
-                              query: { investmentId: v._id },
+                              pathname: isCashFlow
+                                ? "/cash-flow/incomes/update"
+                                : "/resources/incomes/update/",
+                              query: { incomeId: v._id },
                             });
                           }}
                         >
@@ -499,7 +468,7 @@ export default function Resources() {
                         <button
                           className="border rounded-[5px] border-[#E6E6EB] p-1 text-[#54577A]"
                           onClick={() => {
-                            deleteinvestment(v?._id);
+                            deleteincome(v?._id);
                           }}
                         >
                           <svg
@@ -529,7 +498,9 @@ export default function Resources() {
         <div className="w-full flex justify-end items-center">
           <button
             onClick={() => {
-              router.push("/cash-flow");
+              router.push({
+                pathname: isCashFlow ? "/" : "/cash-flow",
+              });
             }}
             className="w-auto rounded-lg px-3 py-2 text-white font-medium capitalize bg-[#57BA52] hover:opacity-90"
           >
@@ -539,18 +510,24 @@ export default function Resources() {
         <PopUp
           isOpen={openPopUp}
           closePopUp={() => setOpenPopUp(false)}
-          title="Add new Investment"
+          title="Add New Income"
           isClose
         >
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-5">
-            {assetsType.map((v, i) => (
+            {incomeTypes.map((v, i) => (
               <Link
                 href={{
-                  pathname: `/resources/investments/add`,
-                  query: { investment_type: JSON.stringify(v) },
+                  pathname: isCashFlow
+                    ? "/cash-flow/incomes/add"
+                    : "/resources/incomes/add",
+                  query: { income_type: JSON.stringify(v) },
                 }}
                 key={i}
-                as={`/resources/investments/add`}
+                as={
+                  isCashFlow
+                    ? "/cash-flow/incomes/add"
+                    : "/resources/incomes/add"
+                }
                 className="w-full bg-white hover:bg-[#F5FAF5] border border-[#57BA52] rounded-lg p-2 flex flex-col justify-center items-center max-w-[165px] h-[85px]"
               >
                 {v?.icon()}
@@ -564,19 +541,5 @@ export default function Resources() {
       </div>
     </Layout>
   );
-}
-
-export const getServerSideProps = async (ctx) => {
-  let newcookies = ctx.req.headers.cookie;
-  newcookies = cookie.parse(newcookies);
-  let user = JSON.parse(newcookies?.user ?? "");
-  if (user?.dob === undefined || user?.dob?.length === 0) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return { props: { user } };
 };
+export default GetIncome;

@@ -1029,7 +1029,7 @@ export default function Update(props) {
                   onChange={(e) => {
                     setFieldValue("is_longterm_goal", e);
                   }}
-                  className="group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
+                  className="cursor-pointer group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
                 >
                   <svg
                     className="stroke-white opacity-0 group-data-[checked]:opacity-100"

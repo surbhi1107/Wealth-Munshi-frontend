@@ -517,7 +517,7 @@ export default function UpdateDept(props) {
               </svg>
             </div>
             <p className="text-[15px] capitalize font-semibold text-[#45486A]">
-              {values.type?.replace("_", " ")}
+              {values.type?.replace(/_/g, " ")}
             </p>
           </div>
           <p className="text-base text-[#A1A1AA] !mt-3">
@@ -1158,7 +1158,7 @@ export default function UpdateDept(props) {
               onChange={(e) => {
                 setFieldValue(`payments.[${selectedId}].isin_cashflow`, e);
               }}
-              className="group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
+              className="cursor-pointer group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
             >
               <svg
                 className="stroke-white opacity-0 group-data-[checked]:opacity-100"

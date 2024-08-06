@@ -148,7 +148,9 @@ export default function GoalsCost() {
                           <td
                             className={`py-1 px-3 capitalize whitespace-nowrap`}
                           >
-                            {v?.type?.length ? v?.type?.replace("_", " ") : "-"}
+                            {v?.type?.length
+                              ? v?.type?.replace(/_/g, " ")
+                              : "-"}
                           </td>
                           <td className={`py-1 px-3 capitalize`}>
                             {`Rs.${v?.amount} ${
