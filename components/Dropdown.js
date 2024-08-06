@@ -10,6 +10,8 @@ const Dropdown = ({
   placeholder = "",
   error,
   errorText,
+  require = false,
+  requireClass = "",
 }) => {
   let newVal = options.find((v) => v?.value === value?.value) ?? {};
   return (
@@ -19,7 +21,12 @@ const Dropdown = ({
           <label
             className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA] ${labelClass}`}
           >
-            {label}
+            {label}{" "}
+            {require ? (
+              <span className={`text-red-600 ${requireClass}`}>*</span>
+            ) : (
+              <></>
+            )}
           </label>
         )}
         <div className={`${dropdownOuterClass} mt-1`}>

@@ -1116,9 +1116,10 @@ export default function Add(props) {
                               let dummyendtime = [...endTime];
                               dummyendtime = dummyendtime.map((v) => {
                                 if (v?.type === "age") {
+                                  let date = getAge(dummymember?.dob, v.value);
                                   return {
                                     ...v,
-                                    date: getAge(dummymember?.dob, v.value),
+                                    date: date,
                                     member: {
                                       _id: dummymember?.value,
                                       name: dummymember?.label,
@@ -1547,7 +1548,15 @@ export default function Add(props) {
                     >
                       Save
                     </button>
-                    <button className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push({
+                          pathname: "/goals",
+                        });
+                      }}
+                      className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]"
+                    >
                       Cancel
                     </button>
                   </>

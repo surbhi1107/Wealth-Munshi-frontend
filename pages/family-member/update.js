@@ -518,7 +518,15 @@ const Update = (props) => {
                         >
                           Update
                         </button>
-                        <button className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push({
+                              pathname: "/",
+                            });
+                          }}
+                          className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]"
+                        >
                           Cancel
                         </button>
                       </>

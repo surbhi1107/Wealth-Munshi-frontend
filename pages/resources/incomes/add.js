@@ -18,8 +18,6 @@ export default function AddIncomes(props) {
   let user = props.user;
   let retireagelist = jsonData?.retire_ages ?? [];
   let lifeExpectancylist = jsonData?.life_expectation ?? [];
-  let lifeOccurences = jsonData?.occurences ?? [];
-  let goalOftenLists = jsonData?.goalOften ?? [];
   let timelineLists = jsonData?.timeline ?? [];
   const [startTime, setStartTime] = useState([
     {
@@ -1823,7 +1821,15 @@ export default function AddIncomes(props) {
                       >
                         Save
                       </button>
-                      <button className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          router.push({
+                            pathname: "/resources/incomes",
+                          });
+                        }}
+                        className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]"
+                      >
                         Cancel
                       </button>
                     </>
