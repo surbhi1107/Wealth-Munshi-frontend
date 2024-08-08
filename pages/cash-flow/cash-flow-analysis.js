@@ -14,7 +14,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import jsonData from "../../data.json";
 
-export default function Home(props) {
+export default function CashFlowAnalysis(props) {
   const router = useRouter();
   let months = jsonData.months ?? [];
   let user = props.user;
@@ -97,19 +97,39 @@ export default function Home(props) {
       <ToastContainer />
       <div className={`w-full space-y-6`}>
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
-          <div className="w-full space-y-4">
-            <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-              Financial Resources Results
-            </h1>
-            <h4 className="font-medium text-[#45486A]">Part A: Net Worth</h4>
-            <p className="text-[#A1A1AA]">
-              The Net Worth Statement provides your personal balance sheet.
-            </p>
-            <h4 className="font-medium text-[#45486A]">Part A: Net Worth</h4>
-            <p className="text-[#A1A1AA]">
-              The table lists your goals and the extent to which your existing
-              resources meet them.
-            </p>
+          <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
+            Cash Flow Results
+          </h1>
+          <div className="w-full md:!mt-3">
+            <ul className="text-[#A1A1AA] space-y-3 list-outside text-justify">
+              <li>
+                Having entered all the cash flow details, the Cash Flow
+                Projection graph provides a compact overview of your lifetime
+                cash flow. This graph shows incomes as positive amounts above
+                the line and expenses, debt repayments and committed savings
+                below the line.
+              </li>
+              <li>
+                The Net Cash Flow, income less expenses, is shown by the line on
+                the graph. Prior to retirement, you should aim to have a
+                positive net cash flow as this will allow them to apply that
+                surplus towards your goals. After retirement you are likely to
+                have a negative cash flow. They will need to use capital to fund
+                your retirement lifestyle goal.
+              </li>
+              <li>
+                The Net Cash Flow prior to retirement can now be used as
+                potential savings to fund goals. Where this is negative they
+                will need to address by changing either income or outgoings for
+                that period. Only the positive amounts are used by the system in
+                the savings analysis.
+              </li>
+              <li>
+                To examine any particular year's cash flow, select the year that
+                you would like to examine in the drop down box and the results
+                will appear in the Cash Flow Breakdown below.
+              </li>
+            </ul>
           </div>
         </div>
         {loading ? (

@@ -9,38 +9,18 @@ import * as cookie from "cookie";
 import Dropdown from "@/components/Dropdown";
 import { toast, ToastContainer } from "react-toastify";
 import moment from "moment";
-import jsonData from "../../data.json";
+import jsonData from "../../../data.json";
 import { Checkbox } from "@headlessui/react";
+import { getAge } from "@/pages/goals/add";
 
-export const getAge = (dob, end_age) => {
-  // Convert the DOB string to a Date object
-  const birthDate = new Date(dob);
-  // Get today's date
-  const today = new Date();
-  // Calculate the age
-  let age = today.getFullYear() - birthDate.getFullYear();
-  // Adjust if the birthday hasn't occurred yet this year
-  const monthDifference = today.getMonth() - birthDate.getMonth();
-  if (
-    monthDifference < 0 ||
-    (monthDifference === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
-  // get left age
-  let years = end_age - age;
-  // Add years to today date
-  let newage = new Date().setFullYear(new Date().getFullYear() + years);
-  return new Date(newage)?.toISOString();
-};
-
-export default function Add(props) {
+export default function AddSaving(props) {
   const router = useRouter();
   let user = props.user;
+  let saving_type = props?.saving_type ?? "";
+  let timelineLists = jsonData?.timeline ?? [];
   let retireagelist = jsonData?.retire_ages ?? [];
   let lifeExpectancylist = jsonData?.life_expectation ?? [];
   let lifeOccurences = jsonData?.occurences ?? [];
-  let goalOftenLists = jsonData?.goalOften ?? [];
   const [startTime, setStartTime] = useState([
     {
       date: "",
@@ -140,7 +120,7 @@ export default function Add(props) {
         dob: "",
       },
       value: "",
-      type: "occurence",
+      type: "afteryears",
       desc: "",
     },
   ]);
@@ -148,6 +128,7 @@ export default function Add(props) {
   const [years, setYears] = useState([]);
   const [ages, setAges] = useState([]);
   const [members, setMembers] = useState([]);
+  const [assets, setAssets] = useState([]);
   const [error, setError] = useState("");
   let ignore = false;
 
@@ -161,13 +142,20 @@ export default function Add(props) {
     handleSubmit,
   } = useFormik({
     initialValues: {
-      type: props.state.value,
+      type: saving_type,
       name: "",
+      asset: {
+        label: "",
+        value: "",
+      },
       amount: 0,
       inflation: "",
-      is_longterm_goal: false,
-      goal_often: "1",
-      start_timeline: {
+      isin_cashflow: false,
+      timeline: {
+        label: "",
+        value: "",
+      },
+      saving_start: {
         type: "year",
         value: "",
         date: "",
@@ -180,7 +168,7 @@ export default function Add(props) {
         },
         desc: "",
       },
-      end_timeline: {
+      saving_end: {
         type: "year",
         value: "",
         date: "",
@@ -197,13 +185,20 @@ export default function Add(props) {
     validationSchema: Yup.object({
       type: Yup.string(),
       name: Yup.string(),
+      asset: Yup.object({
+        value: Yup.string().required("owner is required"),
+        label: Yup.string(),
+      }),
       amount: Yup.number()
         .positive("Enter positive amount")
         .required("Amount is required"),
       inflation: Yup.string().required("Inflation is required"),
-      is_longterm_goal: Yup.bool(),
-      goal_often: Yup.string(),
-      start_timeline: Yup.object({
+      timeline: Yup.object({
+        label: Yup.string(),
+        value: Yup.string(),
+      }),
+      isin_cashflow: Yup.bool(),
+      saving_start: Yup.object({
         date: Yup.string(),
         type: Yup.string(),
         desc: Yup.string(),
@@ -215,7 +210,7 @@ export default function Add(props) {
           dob: Yup.string(),
         }),
       }),
-      end_timeline: Yup.object({
+      saving_end: Yup.object({
         date: Yup.string(),
         type: Yup.string(),
         desc: Yup.string(),
@@ -232,32 +227,35 @@ export default function Add(props) {
       try {
         setLoading(true);
         let dummystartfind = startTime.find(
-          (v) => v.type === values.start_timeline.type
+          (v) => v.type === values.saving_start.type
         );
         let dummyendfind = endTime.find(
-          (v) => v.type === values.end_timeline.type
+          (v) => v.type === values.saving_end.type
         );
         let data = {
           type: values.type,
           name: values.name,
+          ...(values.asset?.value === "0"
+            ? {}
+            : { asset_id: values.asset?.value }),
           amount: values.amount,
           inflation: values.inflation,
-          is_longterm_goal: values.is_longterm_goal,
-          start_timeline: {
+          isin_cashflow: values.isin_cashflow,
+          timeline: values.timeline?.value,
+          saving_start: {
             ...dummystartfind,
             member: dummystartfind.member?._id,
           },
-          ...(values.is_longterm_goal
+          ...(values.type === "regular"
             ? {
-                end_timeline: {
+                saving_end: {
                   ...dummyendfind,
                   member: dummyendfind.member?._id,
                 },
-                goal_often: values.goal_often,
               }
             : {}),
         };
-        const res = await fetch(`/api/goals/add`, {
+        const res = await fetch(`/api/savings/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -266,7 +264,7 @@ export default function Add(props) {
         });
         let res1 = await res.json();
         if (res1.success) {
-          router.push("/goals");
+          router.push("/cash-flow/savings");
           setLoading(false);
         } else {
           setLoading(false);
@@ -281,6 +279,33 @@ export default function Add(props) {
       }
     },
   });
+  console.log(values.asset);
+  const getData = async () => {
+    setLoading(true);
+    let response = await fetch(`/api/resources/get-all-resources`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+    let res1 = await response.json();
+    if (res1?.success) {
+      setLoading(false);
+      let dummyasset = res1?.data?.map((v) => {
+        return {
+          label: v?.type?.replace(/_/g, " "),
+          value: v?._id,
+          curr_valuation: v?.curr_valuation,
+        };
+      });
+      setAssets(dummyasset);
+      getmembers();
+    } else {
+      setLoading(false);
+      setAssets([]);
+    }
+  };
 
   const getmembers = async () => {
     setLoading(true);
@@ -357,7 +382,7 @@ export default function Add(props) {
         };
         newary.push(obj);
       });
-      let dummyoccurence = {
+      let dummyafteryear = {
         member: {
           _id: findmain?._id,
           name: findmain?.fname,
@@ -365,23 +390,27 @@ export default function Add(props) {
           age_retire: findmain?.age_retire,
           life_expectancy: findmain?.life_expectancy,
         },
-        type: "occurence",
+        type: "afteryears",
         value: 2,
         date: getAge(new Date().toISOString(), 2),
-        desc: `After 2 occurences`,
+        desc: `After 2 afteryears`,
       };
       let defaultstart = newary.find((v) => v.type === "year");
       setValues({
         ...values,
-        start_timeline: {
+        asset: {
+          label: "--Not contributing to a resource--",
+          value: 0,
+        },
+        saving_start: {
           ...defaultstart,
         },
-        end_timeline: {
+        saving_end: {
           ...defaultstart,
         },
       });
       setStartTime(newary);
-      setEndTime([...newary, dummyoccurence]);
+      setEndTime([...newary, dummyafteryear]);
     } else {
       setLoading(false);
       setMembers([]);
@@ -393,7 +422,7 @@ export default function Add(props) {
       position: "top-right",
     });
   };
-
+  console.log(saving_type);
   const getYears = () => {
     let currentYear = new Date().getFullYear();
     //get last 110 year of list
@@ -420,7 +449,7 @@ export default function Add(props) {
         dummyage = [...dummyage, { label: `${i}`, value: i }];
       }
       setAges(dummyage);
-      if (dummyage?.length > 0) getmembers();
+      if (dummyage?.length > 0) getData();
     }
     return () => {
       ignore = true;
@@ -433,7 +462,7 @@ export default function Add(props) {
       <div className={`w-full space-y-6`}>
         <div className="w-full px-[30px] py-[30px] bg-white rounded-md space-y-6">
           <h1 className="text-xl md:text-[26px] font-semibold text-[#45486A]">
-            Add New Goal
+            Committed Saving Details
           </h1>
           <div className="w-full flex items-center space-x-3">
             <div className="flex justify-center items-center w-9 h-9 bg-[#57BA52] rounded-full">
@@ -459,7 +488,7 @@ export default function Add(props) {
               </svg>
             </div>
             <p className="text-[15px] capitalize font-semibold text-[#45486A]">
-              {props?.state?.name}
+              {saving_type}
             </p>
           </div>
           <p className="text-base text-[#A1A1AA] !mt-3">
@@ -481,18 +510,64 @@ export default function Add(props) {
                 error={touched.name && errors.name ? true : false}
                 errorText={errors.name}
               />
-              <Input
-                label={"Amount"}
-                value={values.amount}
-                id="amount"
-                keytype="number"
-                min={1}
-                onchange={handleChange}
-                error={touched.amount && errors.amount ? true : false}
-                errorText={errors.amount}
+              <Dropdown
+                placeholder="--Not contributing to a resource--"
+                label={"Associated resource"}
+                options={assets}
+                value={values.asset}
+                onchange={(e) => {
+                  let val = e.target.value;
+                  let dummyasset = assets?.find((v) => v.value === val);
+                  setFieldValue("asset", {
+                    label: dummyasset?.label,
+                    value: dummyasset?.value,
+                    curr_valuation: dummyasset?.curr_valuation,
+                  });
+                }}
+                error={
+                  touched.asset?.value && errors.asset?.value ? true : false
+                }
+                errorText={errors.asset?.value}
                 require
                 requireClass="text-[#54577A]"
               />
+              <div className="md:flex md:col-span-2 items-center md:gap-x-8 gap-y-3">
+                <Input
+                  label={"Amount"}
+                  value={values.amount}
+                  id="amount"
+                  keytype="number"
+                  min={1}
+                  mainClass="w-max"
+                  onchange={handleChange}
+                  error={touched.amount && errors.amount ? true : false}
+                  errorText={errors.amount}
+                  require
+                  requireClass="text-[#54577A]"
+                />
+                <Dropdown
+                  label={"timeline"}
+                  labelClass="invisible"
+                  options={timelineLists}
+                  value={values?.timeline}
+                  onchange={(e) => {
+                    let val = e.target.value;
+                    let dummyfind = timelineLists?.find((v) => v.value === val);
+                    setFieldValue("timeline", {
+                      ...dummyfind,
+                    });
+                  }}
+                  mainClass="w-max"
+                  error={
+                    touched.income_owner?.value && errors.income_owner?.value
+                      ? true
+                      : false
+                  }
+                  errorText={errors.income_owner?.value}
+                  require
+                  requireClass="text-[#54577A]"
+                />
+              </div>
               <Input
                 label={"Inflation %"}
                 value={values.inflation}
@@ -504,14 +579,37 @@ export default function Add(props) {
                 requireClass="text-[#54577A]"
               />
               <div></div>
+              <div className="col-span-2 flex items-center gap-2">
+                <Checkbox
+                  checked={values?.isin_cashflow}
+                  id="isin_cashflow"
+                  onChange={(e) => {
+                    setFieldValue(`isin_cashflow`, e);
+                  }}
+                  className="cursor-pointer group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
+                >
+                  <svg
+                    className="stroke-white opacity-0 group-data-[checked]:opacity-100"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                  >
+                    <path
+                      d="M3 8L6 11L11 3.5"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Checkbox>
+                <label className="text-[#686677] text-base">
+                  Exclude from Cash Flow
+                </label>
+              </div>
               <div className="col-span-2">
-                <h3 className="text-[20px] font-semibold text-[#45486A] mb-2">
-                  Goal timeline
-                </h3>
                 <label
                   className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA]`}
                 >
-                  When does this goal happen?{" "}
+                  When does this regular saving start?{" "}
                   <span className={`text-red-600`}>*</span>
                 </label>
                 <div className="w-full mt-3 space-y-2">
@@ -521,15 +619,15 @@ export default function Add(props) {
                       <input
                         id={"year"}
                         checked={
-                          values.start_timeline?.type === "year" ? true : false
+                          values.saving_start?.type === "year" ? true : false
                         }
                         onChange={() => {
                           let findtype = startTime.find(
                             (v) => v.type === "year"
                           );
-                          setFieldValue("start_timeline", findtype);
+                          setFieldValue("saving_start", findtype);
                         }}
-                        name="start_timeline"
+                        name="saving_start"
                         type="radio"
                         className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
                       />
@@ -589,15 +687,15 @@ export default function Add(props) {
                       <input
                         id={"age"}
                         checked={
-                          values.start_timeline?.type === "age" ? true : false
+                          values.saving_start?.type === "age" ? true : false
                         }
                         onChange={() => {
                           let findtype = startTime.find(
                             (v) => v.type === "age"
                           );
-                          setFieldValue("start_timeline", findtype);
+                          setFieldValue("saving_start", findtype);
                         }}
-                        name="start_timeline"
+                        name="saving_start"
                         type="radio"
                         className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
                       />
@@ -695,7 +793,7 @@ export default function Add(props) {
                       <input
                         id={"age_retire"}
                         checked={
-                          values.start_timeline?.type === "age_retire"
+                          values.saving_start?.type === "age_retire"
                             ? true
                             : false
                         }
@@ -703,9 +801,9 @@ export default function Add(props) {
                           let findtype = startTime.find(
                             (v) => v.type === "age_retire"
                           );
-                          setFieldValue("start_timeline", findtype);
+                          setFieldValue("saving_start", findtype);
                         }}
-                        name="start_timeline"
+                        name="saving_start"
                         type="radio"
                         className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
                       />
@@ -829,7 +927,7 @@ export default function Add(props) {
                       <input
                         id={"life_exp"}
                         checked={
-                          values.start_timeline?.type === "life_exp"
+                          values.saving_start?.type === "life_exp"
                             ? true
                             : false
                         }
@@ -837,9 +935,9 @@ export default function Add(props) {
                           let findtype = startTime.find(
                             (v) => v.type === "life_exp"
                           );
-                          setFieldValue("start_timeline", findtype);
+                          setFieldValue("saving_start", findtype);
                         }}
-                        name="start_timeline"
+                        name="saving_start"
                         type="radio"
                         className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
                       />
@@ -955,581 +1053,529 @@ export default function Add(props) {
                   </div>
                 </div>
               </div>
-              <div className="col-span-2 flex items-center gap-2">
-                <Checkbox
-                  checked={values.is_longterm_goal}
-                  id="is_longterm_goal"
-                  onChange={(e) => {
-                    setFieldValue("is_longterm_goal", e);
-                  }}
-                  className="cursor-pointer group block size-4 rounded border border-[#757575] data-[checked]:border-none bg-white data-[checked]:bg-[#57BA52] focus-within:outline-none"
-                >
-                  <svg
-                    className="stroke-white opacity-0 group-data-[checked]:opacity-100"
-                    viewBox="0 0 14 14"
-                    fill="none"
+              {values.type === "regular" ? (
+                <div className="col-span-2">
+                  <label
+                    className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA]`}
                   >
-                    <path
-                      d="M3 8L6 11L11 3.5"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </Checkbox>
-                <label className="text-[#686677] text-base">
-                  Does the goal happen for more than one year?
-                </label>
-              </div>
-              {values.is_longterm_goal ? (
-                <>
-                  <div className="col-span-2">
-                    <label
-                      className={`w-full text-base font-medium col-span-2 leading-tight text-[#9794AA]`}
-                    >
-                      When does this goal end?{" "}
-                      <span className={`text-red-600`}>*</span>
-                    </label>
-                    <div className="w-full mt-3 space-y-2">
-                      {/* year */}
-                      <div className="flex gap-2 items-center">
-                        <span className="relative flex items-center rounded-full cursor-pointer">
-                          <input
-                            id={"endyear"}
-                            checked={
-                              values.end_timeline?.type === "year"
-                                ? true
-                                : false
-                            }
-                            onChange={() => {
-                              let findtype = endTime.find(
-                                (v) => v.type === "year"
-                              );
-                              setFieldValue("end_timeline", findtype);
-                            }}
-                            name="end_timeline"
-                            type="radio"
-                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
-                          />
-                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 16 16"
-                              fill="currentColor"
-                            >
-                              <circle
-                                data-name="ellipse"
-                                cx="8"
-                                cy="8"
-                                r="8"
-                              ></circle>
-                            </svg>
-                          </span>
+                    When does this contribution end?{" "}
+                    <span className={`text-red-600`}>*</span>
+                  </label>
+                  <div className="w-full mt-3 space-y-2">
+                    {/* year */}
+                    <div className="flex gap-2 items-center">
+                      <span className="relative flex items-center rounded-full cursor-pointer">
+                        <input
+                          id={"endyear"}
+                          checked={
+                            values.saving_end?.type === "year" ? true : false
+                          }
+                          onChange={() => {
+                            let findtype = endTime.find(
+                              (v) => v.type === "year"
+                            );
+                            setFieldValue("saving_end", findtype);
+                          }}
+                          name="saving_end"
+                          type="radio"
+                          className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                        />
+                        <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <circle
+                              data-name="ellipse"
+                              cx="8"
+                              cy="8"
+                              r="8"
+                            ></circle>
+                          </svg>
                         </span>
-                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
-                          <p>In the year</p>
-                          <Dropdown
-                            options={years}
-                            value={{
-                              label: endTime?.find((v) => v?.type === "age")
-                                ?.value,
-                              value: endTime?.find((v) => v?.type === "age")
-                                ?.value,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = parseInt(e.target.value);
-                              let dummyyear = years?.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                if (v?.type === "year") {
-                                  return {
-                                    ...v,
-                                    date: moment(new Date())
-                                      .set("year", dummyyear?.value)
-                                      .startOf("y")
-                                      .format(),
-                                    desc: `In ${dummyyear?.value}`,
-                                    value: dummyyear?.value,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                        </div>
+                      </span>
+                      <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                        <p>In the year</p>
+                        <Dropdown
+                          options={years}
+                          value={{
+                            label: endTime?.find((v) => v?.type === "age")
+                              ?.value,
+                            value: endTime?.find((v) => v?.type === "age")
+                              ?.value,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = parseInt(e.target.value);
+                            let dummyyear = years?.find((v) => v.value === val);
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              if (v?.type === "year") {
+                                return {
+                                  ...v,
+                                  date: moment(new Date())
+                                    .set("year", dummyyear?.value)
+                                    .startOf("y")
+                                    .format(),
+                                  desc: `In ${dummyyear?.value}`,
+                                  value: dummyyear?.value,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
                       </div>
-                      {/* age */}
-                      <div className="flex gap-2 items-center">
-                        <span className="relative flex items-center rounded-full cursor-pointer">
-                          <input
-                            id={"endage"}
-                            checked={
-                              values.end_timeline?.type === "age" ? true : false
-                            }
-                            onChange={() => {
-                              let findtype = endTime.find(
-                                (v) => v.type === "age"
-                              );
-                              setFieldValue("end_timeline", findtype);
-                            }}
-                            name="end_timeline"
-                            type="radio"
-                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
-                          />
-                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 16 16"
-                              fill="currentColor"
-                            >
-                              <circle
-                                data-name="ellipse"
-                                cx="8"
-                                cy="8"
-                                r="8"
-                              ></circle>
-                            </svg>
-                          </span>
+                    </div>
+                    {/* age */}
+                    <div className="flex gap-2 items-center">
+                      <span className="relative flex items-center rounded-full cursor-pointer">
+                        <input
+                          id={"endage"}
+                          checked={
+                            values.saving_end?.type === "age" ? true : false
+                          }
+                          onChange={() => {
+                            let findtype = endTime.find(
+                              (v) => v.type === "age"
+                            );
+                            setFieldValue("saving_end", findtype);
+                          }}
+                          name="saving_end"
+                          type="radio"
+                          className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                        />
+                        <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <circle
+                              data-name="ellipse"
+                              cx="8"
+                              cy="8"
+                              r="8"
+                            ></circle>
+                          </svg>
                         </span>
-                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
-                          <p>When</p>
-                          <Dropdown
-                            options={members}
-                            value={{
-                              label: endTime?.find((v) => v?.type === "age")
-                                ?.member?.name,
-                              value: endTime?.find((v) => v?.type === "age")
-                                ?.member?._id,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = e.target.value;
-                              let dummymember = members?.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                if (v?.type === "age") {
-                                  let date = getAge(dummymember?.dob, v.value);
-                                  return {
-                                    ...v,
-                                    date: date,
-                                    member: {
-                                      _id: dummymember?.value,
-                                      name: dummymember?.label,
-                                      dob: dummymember?.dob,
-                                      age_retire: dummymember?.age_retire,
-                                      life_expectancy:
-                                        dummymember?.life_expectancy,
-                                    },
-                                    desc: `When ${dummymember?.label} is ${
-                                      v.value
-                                    } (${moment(date)?.get("year")})`,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                          <p>is</p>
-                          <Dropdown
-                            options={ages}
-                            value={{
-                              label: endTime?.find((v) => v?.type === "age")
-                                ?.value,
-                              value: endTime?.find((v) => v?.type === "age")
-                                ?.value,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = parseInt(e.target.value);
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                if (v?.type === "age") {
-                                  let dob = getAge(v.member?.dob, val);
-                                  return {
-                                    ...v,
-                                    date: dob,
-                                    desc: `When ${
-                                      v?.member?.name
-                                    } is ${val} (${moment(dob).get("year")})`,
-                                    value: val,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                        </div>
+                      </span>
+                      <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                        <p>When</p>
+                        <Dropdown
+                          options={members}
+                          value={{
+                            label: endTime?.find((v) => v?.type === "age")
+                              ?.member?.name,
+                            value: endTime?.find((v) => v?.type === "age")
+                              ?.member?._id,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = e.target.value;
+                            let dummymember = members?.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              if (v?.type === "age") {
+                                let date = getAge(dummymember?.dob, v.value);
+                                return {
+                                  ...v,
+                                  date: date,
+                                  member: {
+                                    _id: dummymember?.value,
+                                    name: dummymember?.label,
+                                    dob: dummymember?.dob,
+                                    age_retire: dummymember?.age_retire,
+                                    life_expectancy:
+                                      dummymember?.life_expectancy,
+                                  },
+                                  desc: `When ${dummymember?.label} is ${
+                                    v.value
+                                  } (${moment(date)?.get("year")})`,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
+                        <p>is</p>
+                        <Dropdown
+                          options={ages}
+                          value={{
+                            label: endTime?.find((v) => v?.type === "age")
+                              ?.value,
+                            value: endTime?.find((v) => v?.type === "age")
+                              ?.value,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = parseInt(e.target.value);
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              if (v?.type === "age") {
+                                let dob = getAge(v.member?.dob, val);
+                                return {
+                                  ...v,
+                                  date: dob,
+                                  desc: `When ${
+                                    v?.member?.name
+                                  } is ${val} (${moment(dob).get("year")})`,
+                                  value: val,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
                       </div>
-                      {/* age retire */}
-                      <div className="flex gap-2 items-center">
-                        <span className="relative flex items-center rounded-full cursor-pointer">
-                          <input
-                            id={"endage_retire"}
-                            checked={
-                              values.end_timeline?.type === "age_retire"
-                                ? true
-                                : false
-                            }
-                            onChange={() => {
-                              let findtype = endTime.find(
-                                (v) => v.type === "age_retire"
-                              );
-                              setFieldValue("end_timeline", findtype);
-                            }}
-                            name="end_timeline"
-                            type="radio"
-                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
-                          />
-                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 16 16"
-                              fill="currentColor"
-                            >
-                              <circle
-                                data-name="ellipse"
-                                cx="8"
-                                cy="8"
-                                r="8"
-                              ></circle>
-                            </svg>
-                          </span>
+                    </div>
+                    {/* age retire */}
+                    <div className="flex gap-2 items-center">
+                      <span className="relative flex items-center rounded-full cursor-pointer">
+                        <input
+                          id={"endage_retire"}
+                          checked={
+                            values.saving_end?.type === "age_retire"
+                              ? true
+                              : false
+                          }
+                          onChange={() => {
+                            let findtype = endTime.find(
+                              (v) => v.type === "age_retire"
+                            );
+                            setFieldValue("saving_end", findtype);
+                          }}
+                          name="saving_end"
+                          type="radio"
+                          className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                        />
+                        <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <circle
+                              data-name="ellipse"
+                              cx="8"
+                              cy="8"
+                              r="8"
+                            ></circle>
+                          </svg>
                         </span>
-                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
-                          <p>When</p>
-                          <Dropdown
-                            options={members}
-                            value={{
-                              label: endTime?.find(
-                                (v) => v?.type === "age_retire"
-                              )?.member?.name,
-                              value: endTime?.find(
-                                (v) => v?.type === "age_retire"
-                              )?.member?._id,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = e.target.value;
-                              let dummymember = members?.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                let age = dummymember?.age_retire + v?.value;
-                                if (v?.type === "age_retire") {
-                                  let findretire = retireagelist.find(
-                                    (d) => d.value === v?.value
-                                  );
-                                  return {
-                                    ...v,
-                                    date: getAge(dummymember?.dob, age),
-                                    member: {
-                                      _id: dummymember?.value,
-                                      name: dummymember?.label,
-                                      dob: dummymember?.dob,
-                                      age_retire: dummymember?.age_retire,
-                                      life_expectancy:
-                                        dummymember?.life_expectancy,
-                                    },
-                                    desc:
-                                      findretire?.value === 0
-                                        ? `when ${
-                                            dummymember?.label
-                                          } retires (${moment(newdate).get(
-                                            "year"
-                                          )})`
-                                        : `${findretire?.label} of ${
-                                            dummymember?.label
-                                          } (${moment(newdate).get("year")})`,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                          <p>reaches</p>
-                          <Dropdown
-                            options={retireagelist}
-                            value={{
-                              label: endTime?.find(
-                                (v) => v?.type === "age_retire"
-                              )?.value,
-                              value: endTime?.find(
-                                (v) => v?.type === "age_retire"
-                              )?.value,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = parseInt(e.target.value);
-                              let findretire = retireagelist.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                let age = v?.member?.age_retire + val;
-                                if (v?.type === "age_retire") {
-                                  let newdate = getAge(v.member?.dob, age);
-                                  return {
-                                    ...v,
-                                    date: newdate,
-                                    value: val,
-                                    desc:
-                                      findretire?.value === 0
-                                        ? `When ${
-                                            v?.member?.name
-                                          } retires (${moment(newdate).get(
-                                            "year"
-                                          )})`
-                                        : `${findretire?.label} of ${
-                                            v?.member?.name
-                                          } (${moment(newdate).get("year")})`,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                        </div>
+                      </span>
+                      <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                        <p>When</p>
+                        <Dropdown
+                          options={members}
+                          value={{
+                            label: endTime?.find(
+                              (v) => v?.type === "age_retire"
+                            )?.member?.name,
+                            value: endTime?.find(
+                              (v) => v?.type === "age_retire"
+                            )?.member?._id,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = e.target.value;
+                            let dummymember = members?.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              let age = dummymember?.age_retire + v?.value;
+                              if (v?.type === "age_retire") {
+                                let findretire = retireagelist.find(
+                                  (d) => d.value === v?.value
+                                );
+                                return {
+                                  ...v,
+                                  date: getAge(dummymember?.dob, age),
+                                  member: {
+                                    _id: dummymember?.value,
+                                    name: dummymember?.label,
+                                    dob: dummymember?.dob,
+                                    age_retire: dummymember?.age_retire,
+                                    life_expectancy:
+                                      dummymember?.life_expectancy,
+                                  },
+                                  desc:
+                                    findretire?.value === 0
+                                      ? `when ${
+                                          dummymember?.label
+                                        } retires (${moment(newdate).get(
+                                          "year"
+                                        )})`
+                                      : `${findretire?.label} of ${
+                                          dummymember?.label
+                                        } (${moment(newdate).get("year")})`,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
+                        <p>reaches</p>
+                        <Dropdown
+                          options={retireagelist}
+                          value={{
+                            label: endTime?.find(
+                              (v) => v?.type === "age_retire"
+                            )?.value,
+                            value: endTime?.find(
+                              (v) => v?.type === "age_retire"
+                            )?.value,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = parseInt(e.target.value);
+                            let findretire = retireagelist.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              let age = v?.member?.age_retire + val;
+                              if (v?.type === "age_retire") {
+                                let newdate = getAge(v.member?.dob, age);
+                                return {
+                                  ...v,
+                                  date: newdate,
+                                  value: val,
+                                  desc:
+                                    findretire?.value === 0
+                                      ? `When ${
+                                          v?.member?.name
+                                        } retires (${moment(newdate).get(
+                                          "year"
+                                        )})`
+                                      : `${findretire?.label} of ${
+                                          v?.member?.name
+                                        } (${moment(newdate).get("year")})`,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
                       </div>
-                      {/* life expectancy */}
-                      <div className="flex gap-2 items-center">
-                        <span className="relative flex items-center rounded-full cursor-pointer">
-                          <input
-                            id={"endlife_exp"}
-                            checked={
-                              values.end_timeline?.type === "life_exp"
-                                ? true
-                                : false
-                            }
-                            onChange={() => {
-                              let findtype = endTime.find(
-                                (v) => v.type === "life_exp"
-                              );
-                              setFieldValue("end_timeline", findtype);
-                            }}
-                            name="end_timeline"
-                            type="radio"
-                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
-                          />
-                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 16 16"
-                              fill="currentColor"
-                            >
-                              <circle
-                                data-name="ellipse"
-                                cx="8"
-                                cy="8"
-                                r="8"
-                              ></circle>
-                            </svg>
-                          </span>
+                    </div>
+                    {/* life expectancy */}
+                    <div className="flex gap-2 items-center">
+                      <span className="relative flex items-center rounded-full cursor-pointer">
+                        <input
+                          id={"endlife_exp"}
+                          checked={
+                            values.saving_end?.type === "life_exp"
+                              ? true
+                              : false
+                          }
+                          onChange={() => {
+                            let findtype = endTime.find(
+                              (v) => v.type === "life_exp"
+                            );
+                            setFieldValue("saving_end", findtype);
+                          }}
+                          name="saving_end"
+                          type="radio"
+                          className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                        />
+                        <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <circle
+                              data-name="ellipse"
+                              cx="8"
+                              cy="8"
+                              r="8"
+                            ></circle>
+                          </svg>
                         </span>
-                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
-                          <p>When</p>
-                          <Dropdown
-                            options={members}
-                            value={{
-                              label: endTime?.find(
-                                (v) => v?.type === "life_exp"
-                              )?.member?.name,
-                              value: endTime?.find(
-                                (v) => v?.type === "life_exp"
-                              )?.member?._id,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = e.target.value;
-                              let dummymember = members?.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                let age =
-                                  dummymember?.life_expectancy + v?.value;
-                                if (v?.type === "life_exp") {
-                                  let findretire = lifeExpectancylist.find(
-                                    (d) => d.value === v?.value
-                                  );
-                                  let newdate = getAge(dummymember?.dob, age);
-                                  return {
-                                    ...v,
-                                    date: newdate,
-                                    member: {
-                                      _id: dummymember?.value,
-                                      name: dummymember?.label,
-                                      dob: dummymember?.dob,
-                                      age_retire: dummymember?.age_retire,
-                                      life_expectancy:
-                                        dummymember?.life_expectancy,
-                                    },
-                                    desc:
-                                      dummymember?.value === 0
-                                        ? `When ${
-                                            v?.member?.name
-                                          } retires (${moment(newdate).get(
-                                            "year"
-                                          )})`
-                                        : `${dummymember?.label} of ${
-                                            findretire?.label
-                                          } (${moment(newdate).get("year")})`,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                          <p>reaches</p>
-                          <Dropdown
-                            options={lifeExpectancylist}
-                            value={{
-                              label: endTime?.find(
-                                (v) => v?.type === "life_exp"
-                              )?.value,
-                              value: endTime?.find(
-                                (v) => v?.type === "life_exp"
-                              )?.value,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = parseInt(e.target.value);
-                              let findretire = lifeExpectancylist.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                let age = v?.member?.life_expectancy + val;
-                                if (v?.type === "life_exp") {
-                                  let newdate = getAge(v.member?.dob, age);
-                                  return {
-                                    ...v,
-                                    date: newdate,
-                                    desc:
-                                      findretire?.value === 0
-                                        ? `When ${
-                                            v?.member?.name
-                                          } expires (${moment(newdate).get(
-                                            "year"
-                                          )})`
-                                        : `${findretire?.label} of ${
-                                            v?.member?.name
-                                          } (${moment(newdate).get("year")})`,
-                                    value: val,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                        </div>
+                      </span>
+                      <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                        <p>When</p>
+                        <Dropdown
+                          options={members}
+                          value={{
+                            label: endTime?.find((v) => v?.type === "life_exp")
+                              ?.member?.name,
+                            value: endTime?.find((v) => v?.type === "life_exp")
+                              ?.member?._id,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = e.target.value;
+                            let dummymember = members?.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              let age = dummymember?.life_expectancy + v?.value;
+                              if (v?.type === "life_exp") {
+                                let findretire = lifeExpectancylist.find(
+                                  (d) => d.value === v?.value
+                                );
+                                let newdate = getAge(dummymember?.dob, age);
+                                return {
+                                  ...v,
+                                  date: newdate,
+                                  member: {
+                                    _id: dummymember?.value,
+                                    name: dummymember?.label,
+                                    dob: dummymember?.dob,
+                                    age_retire: dummymember?.age_retire,
+                                    life_expectancy:
+                                      dummymember?.life_expectancy,
+                                  },
+                                  desc:
+                                    dummymember?.value === 0
+                                      ? `When ${
+                                          v?.member?.name
+                                        } retires (${moment(newdate).get(
+                                          "year"
+                                        )})`
+                                      : `${dummymember?.label} of ${
+                                          findretire?.label
+                                        } (${moment(newdate).get("year")})`,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
+                        <p>reaches</p>
+                        <Dropdown
+                          options={lifeExpectancylist}
+                          value={{
+                            label: endTime?.find((v) => v?.type === "life_exp")
+                              ?.value,
+                            value: endTime?.find((v) => v?.type === "life_exp")
+                              ?.value,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = parseInt(e.target.value);
+                            let findretire = lifeExpectancylist.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              let age = v?.member?.life_expectancy + val;
+                              if (v?.type === "life_exp") {
+                                let newdate = getAge(v.member?.dob, age);
+                                return {
+                                  ...v,
+                                  date: newdate,
+                                  desc:
+                                    findretire?.value === 0
+                                      ? `When ${
+                                          v?.member?.name
+                                        } expires (${moment(newdate).get(
+                                          "year"
+                                        )})`
+                                      : `${findretire?.label} of ${
+                                          v?.member?.name
+                                        } (${moment(newdate).get("year")})`,
+                                  value: val,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
                       </div>
-                      {/* occurances */}
-                      <div className="flex gap-2 items-center">
-                        <span className="relative flex items-center rounded-full cursor-pointer">
-                          <input
-                            id={"endoccurence"}
-                            checked={
-                              values.end_timeline?.type === "occurence"
-                                ? true
-                                : false
-                            }
-                            onChange={() => {
-                              let findtype = endTime.find(
-                                (v) => v.type === "occurence"
-                              );
-                              setFieldValue("end_timeline", findtype);
-                            }}
-                            name="end_timeline"
-                            type="radio"
-                            className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
-                          />
-                          <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-2.5 w-2.5"
-                              viewBox="0 0 16 16"
-                              fill="currentColor"
-                            >
-                              <circle
-                                data-name="ellipse"
-                                cx="8"
-                                cy="8"
-                                r="8"
-                              ></circle>
-                            </svg>
-                          </span>
+                    </div>
+                    {/* after years */}
+                    <div className="flex gap-2 items-center">
+                      <span className="relative flex items-center rounded-full cursor-pointer">
+                        <input
+                          id={"afteryears"}
+                          checked={
+                            values.saving_end?.type === "afteryears"
+                              ? true
+                              : false
+                          }
+                          onChange={() => {
+                            let findtype = endTime.find(
+                              (v) => v.type === "afteryears"
+                            );
+                            setFieldValue("saving_end", findtype);
+                          }}
+                          name="saving_end"
+                          type="radio"
+                          className="before:content[''] peer relative -gray h-4 w-4 cursor-pointer appearance-none rounded-full border border-[#757575] before:absolute before:top-2/4 before:left-2/4 before:block before:h-[17px] before:w-[17px] before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-[#57BA52] before:opacity-0 before:transition-opacity checked:border-[#57BA52] checked:before:bg-[#57BA52]"
+                        />
+                        <span className="absolute text-[#57BA52] transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <circle
+                              data-name="ellipse"
+                              cx="8"
+                              cy="8"
+                              r="8"
+                            ></circle>
+                          </svg>
                         </span>
-                        <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
-                          <p>After</p>
-                          <Dropdown
-                            options={lifeOccurences}
-                            value={{
-                              label: endTime?.find(
-                                (v) => v?.type === "occurence"
-                              )?.value,
-                              value: endTime?.find(
-                                (v) => v?.type === "occurence"
-                              )?.value,
-                            }}
-                            mainClass="w-max"
-                            onchange={(e) => {
-                              let val = parseInt(e.target.value);
-                              let dummyoccu = lifeOccurences?.find(
-                                (v) => v.value === val
-                              );
-                              let dummyendtime = [...endTime];
-                              dummyendtime = dummyendtime.map((v) => {
-                                if (v?.type === "occurence") {
-                                  return {
-                                    ...v,
-                                    date: getAge(new Date().toISOString(), val),
-                                    desc: `After ${val} occurences`,
-                                    value: dummyoccu?.value,
-                                  };
-                                }
-                                return { ...v };
-                              });
-                              setEndTime(dummyendtime);
-                            }}
-                          />
-                          <p>occurences</p>
-                        </div>
+                      </span>
+                      <div className="w-full col-span-2 text-[#686677] text-base flex space-x-3 items-center">
+                        <p>After</p>
+                        <Dropdown
+                          options={lifeOccurences}
+                          value={{
+                            label: endTime?.find(
+                              (v) => v?.type === "afteryears"
+                            )?.value,
+                            value: endTime?.find(
+                              (v) => v?.type === "afteryears"
+                            )?.value,
+                          }}
+                          mainClass="w-max"
+                          onchange={(e) => {
+                            let val = parseInt(e.target.value);
+                            let dummyoccu = lifeOccurences?.find(
+                              (v) => v.value === val
+                            );
+                            let dummyendtime = [...endTime];
+                            dummyendtime = dummyendtime.map((v) => {
+                              if (v?.type === "afteryears") {
+                                return {
+                                  ...v,
+                                  date: getAge(new Date().toISOString(), val),
+                                  desc: `After ${val} Years`,
+                                  value: dummyoccu?.value,
+                                };
+                              }
+                              return { ...v };
+                            });
+                            setEndTime(dummyendtime);
+                          }}
+                        />
+                        <p>years</p>
                       </div>
                     </div>
                   </div>
-                  <Dropdown
-                    options={goalOftenLists}
-                    value={{
-                      label: values.goal_often,
-                      value: parseInt(values.goal_often),
-                    }}
-                    mainClass="w-full"
-                    onchange={(e) => {
-                      let val = parseInt(e.target.value);
-                      let dummyoften = goalOftenLists.find(
-                        (v) => v.value === val
-                      );
-                      setFieldValue("goal_often", dummyoften?.value);
-                    }}
-                  />
-                </>
+                </div>
               ) : (
                 <></>
               )}
@@ -1552,7 +1598,7 @@ export default function Add(props) {
                       type="button"
                       onClick={() => {
                         router.push({
-                          pathname: "/goals",
+                          pathname: "/cash-flow/savings",
                         });
                       }}
                       className="w-full border border-[#999999] hover:border-[#57BA52] rounded-lg py-2 bg-transparent px-5 font-medium capitalize text-[#999999] hover:text-[#57BA52]"
@@ -1582,17 +1628,14 @@ export const getServerSideProps = async (ctx) => {
       },
     };
   }
-  if (!ctx?.query?.goal_type) {
+  if (!ctx?.query?.saving_type) {
     return {
       redirect: {
-        destination: "/goals",
+        destination: "/cash-flow/savings",
         permanent: false,
       },
     };
   }
-  let goal_type =
-    ctx?.query?.goal_type === undefined
-      ? ""
-      : JSON.parse(ctx?.query?.goal_type);
-  return { props: { state: goal_type, user: user } };
+  let saving_type = ctx?.query?.saving_type ?? "";
+  return { props: { saving_type, user } };
 };

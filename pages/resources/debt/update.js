@@ -166,6 +166,7 @@ export default function UpdateDept(props) {
       interest: 0,
       payments: [
         {
+          _id: "",
           type: "",
           name: "",
           amount: 0,
@@ -219,6 +220,7 @@ export default function UpdateDept(props) {
       }),
       payments: Yup.array().of(
         Yup.object({
+          _id: Yup.string(),
           type: Yup.string(),
           name: Yup.string(),
           amount: Yup.number()
@@ -272,6 +274,7 @@ export default function UpdateDept(props) {
               ? {
                   payment_details: values.payments?.map((v) => {
                     return {
+                      _id: v?._id,
                       type: v?.type,
                       name: v?.name,
                       amount: (v?.amount).toFixed(2),
@@ -282,20 +285,24 @@ export default function UpdateDept(props) {
                         value: v?.next_payment_start?.value,
                         date: v?.next_payment_start?.date,
                         ...(v?.next_payment_start?.type !== "year"
-                          ? { member: v?.next_payment_start?.member }
+                          ? { member: v?.next_payment_start?.member?._id }
                           : {}),
                         desc: v?.next_payment_start?.desc,
                       },
-                      next_payment_end: {
-                        type: v?.next_payment_end?.type,
-                        value: v?.next_payment_end?.value,
-                        date: v?.next_payment_end?.date,
-                        ...(v?.next_payment_end?.type !== "year" ||
-                        v?.next_payment_end?.type !== "afteryear"
-                          ? { member: v?.next_payment_end?.member }
-                          : {}),
-                        desc: v?.next_payment_end?.desc,
-                      },
+                      ...(v?.type === "regular"
+                        ? {
+                            next_payment_end: {
+                              type: v?.next_payment_end?.type,
+                              value: v?.next_payment_end?.value,
+                              date: v?.next_payment_end?.date,
+                              ...(v?.next_payment_end?.type !== "year" ||
+                              v?.next_payment_end?.type !== "afteryear"
+                                ? { member: v?.next_payment_end?.member?._id }
+                                : {}),
+                              desc: v?.next_payment_end?.desc,
+                            },
+                          }
+                        : {}),
                       isin_cashflow: v?.isin_cashflow,
                     };
                   }),
@@ -376,6 +383,7 @@ export default function UpdateDept(props) {
           (d) => d.value === v?.next_payment_start?.timeline
         );
         return {
+          _id: v?._id,
           type: v?.type,
           name: v?.name,
           amount: v?.amount,
@@ -387,13 +395,13 @@ export default function UpdateDept(props) {
           },
           next_payment_start: {
             type: v?.next_payment_start?.type,
-            value: v?.next_payment_start?.value,
+            value: +v?.next_payment_start?.value,
             date: v?.next_payment_start?.date,
             desc: v?.next_payment_start?.desc,
             ...(v?.next_payment_start?.type !== "year"
               ? {
                   member: {
-                    label: v?.next_payment_start?.member.name,
+                    label: v?.next_payment_start?.member?.fname,
                     value: v?.next_payment_start?.member?._id,
                     dob: v?.next_payment_start?.member?.dob,
                     age_retire: v?.next_payment_start?.member?.age_retire,
@@ -403,24 +411,29 @@ export default function UpdateDept(props) {
                 }
               : {}),
           },
-          next_payment_end: {
-            type: v?.next_payment_end?.type,
-            value: v?.next_payment_end?.value,
-            date: v?.next_payment_end?.date,
-            desc: v?.next_payment_end?.desc,
-            ...(v?.next_payment_end?.type !== "year"
-              ? {
-                  member: {
-                    label: v?.next_payment_end?.member.name,
-                    value: v?.next_payment_end?.member?._id,
-                    dob: v?.next_payment_end?.member?.dob,
-                    age_retire: v?.next_payment_end?.member?.age_retire,
-                    life_expectancy:
-                      v?.next_payment_end?.member?.life_expectancy,
-                  },
-                }
-              : {}),
-          },
+          ...(v.type === "regular"
+            ? {
+                next_payment_end: {
+                  type: v?.next_payment_end?.type,
+                  value: +v?.next_payment_end?.value,
+                  date: v?.next_payment_end?.date,
+                  desc: v?.next_payment_end?.desc,
+                  ...(v?.next_payment_end?.type !== "year" ||
+                  v?.next_payment_end?.type !== "afteryear"
+                    ? {
+                        member: {
+                          label: v?.next_payment_end?.member?.fname,
+                          value: v?.next_payment_end?.member?._id,
+                          dob: v?.next_payment_end?.member?.dob,
+                          age_retire: v?.next_payment_end?.member?.age_retire,
+                          life_expectancy:
+                            v?.next_payment_end?.member?.life_expectancy,
+                        },
+                      }
+                    : {}),
+                },
+              }
+            : {}),
         };
       });
       setValues({
@@ -439,7 +452,7 @@ export default function UpdateDept(props) {
       setLoading(false);
     }
   };
-
+  // console.log(values.payments);
   const successToast = (msg) => {
     toast.success(msg, {
       position: "top-right",
@@ -451,12 +464,12 @@ export default function UpdateDept(props) {
       position: "top-right",
     });
   };
-
+  // console.log(endTime);
   const getYears = () => {
     let currentYear = new Date().getFullYear();
     //get last 110 year of list
     let damiyears = [];
-    for (var i = currentYear + 1; i <= currentYear + 80; i++) {
+    for (var i = currentYear; i <= currentYear + 80; i++) {
       damiyears.push({ label: i, value: i });
     }
     setYears(damiyears);
@@ -947,8 +960,38 @@ export default function UpdateDept(props) {
                                   date: getAge(new Date().toISOString(), 2),
                                   desc: `After 2 years`,
                                 };
-                                setStartTime(newary);
-                                setEndTime([...newary, dummyoccurence]);
+
+                                let starttime = {
+                                  ...values.payments?.[index]
+                                    ?.next_payment_start,
+                                };
+                                let endttime = {
+                                  ...values.payments?.[index]?.next_payment_end,
+                                };
+                                dummystart = [...newary];
+                                dummystart = dummystart.map((v) => {
+                                  if (v?.type === starttime?.type) {
+                                    return {
+                                      ...starttime,
+                                    };
+                                  }
+                                  return v;
+                                });
+                                let dummyend = [
+                                  ...newary,
+                                  { ...dummyoccurence },
+                                ];
+                                dummyend = dummyend.map((v) => {
+                                  if (v?.type === endttime?.type) {
+                                    return {
+                                      ...endttime,
+                                    };
+                                  }
+                                  return v;
+                                });
+
+                                setStartTime(dummystart);
+                                setEndTime(dummyend);
                                 setSelectedId(index);
                                 setIsEdit(true);
                                 setOpenPopUp(true);
@@ -2146,11 +2189,11 @@ export default function UpdateDept(props) {
                       />
                     </div>
                   </div>
-                  {/* occurances */}
+                  {/* afteryears */}
                   <div className="flex gap-2 items-center">
                     <span className="relative flex items-center rounded-full cursor-pointer">
                       <input
-                        id={"endoccurence"}
+                        id={"afteryear"}
                         checked={
                           values.payments?.[selectedId]?.next_payment_end
                             ?.type === "afteryear"
